@@ -319,10 +319,16 @@ test("pending browser checkout is never falsely shown as failed and later recove
   const o = await api(request, "GET", "/api/orders/" + oid, customerToken);
   expect(o.status).toBe("PAID");
 });
-test("session logout clears client state and deep-link refresh preserves router", async ({
+test("admin session survives reload, logout clears it and deep links preserve the router", async ({
   page,
 }) => {
-  await login(page);
+  await login(page, "ADMIN", "/admin");
+  await page.reload();
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(
+    page.getByRole("heading", { name: "Vue d'ensemble", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Retour boutique", exact: true }).click();
   await page.getByRole("button", { name: "Déconnexion", exact: true }).click();
   await expect(page).toHaveURL(/login/);
   await page.goto("/account");

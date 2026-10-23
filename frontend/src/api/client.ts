@@ -12,6 +12,36 @@ export function setTokens(value: Tokens | null) {
 export function getTokens() {
   return tokens;
 }
+function accessOnly(value: Tokens): Tokens {
+  return {
+    access_token: value.access_token,
+    expires_in: value.expires_in,
+    token_type: value.token_type,
+  };
+}
+function hasSessionMarker() {
+  return typeof document !== "undefined" &&
+    document.cookie.split(";").some((item) => item.trim() === "market_session=1");
+}
+function clearSessionMarker() {
+  if (typeof document !== "undefined")
+    document.cookie = "market_session=; Max-Age=0; Path=/; SameSite=Strict";
+}
+export async function restoreSession() {
+  if (!hasSessionMarker()) return false;
+  try {
+    const next = await request<Tokens>(
+      "/api/auth/refresh",
+      { method: "POST", body: "{}" },
+      false,
+    );
+    setTokens(accessOnly(next));
+    return true;
+  } catch (error) {
+    clearSessionMarker();
+    throw error;
+  }
+}
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -46,6 +76,7 @@ export async function request<T>(
   const send = () =>
     fetch(base + path, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...(auth && tokens
@@ -67,20 +98,17 @@ export async function request<T>(
   }
   if (response.status === 401 && auth && tokens) {
     if (!refreshing) {
-      const current = tokens,
-        epoch = generation;
+      const epoch = generation;
       refreshing = (async () => {
         try {
           const next = await request<Tokens>(
             "/api/auth/refresh",
-            {
-              method: "POST",
-              body: JSON.stringify({ refresh_token: current.refresh_token }),
-            },
+            { method: "POST", body: "{}" },
             false,
           );
-          if (generation === epoch) setTokens(next);
+          if (generation === epoch) setTokens(accessOnly(next));
         } catch {
+          clearSessionMarker();
           if (generation === epoch) setTokens(null);
         }
       })().finally(() => {

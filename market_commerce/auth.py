@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError
-from fastapi import Depends, Request
+from fastapi import Depends, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -45,7 +45,37 @@ class Login(BaseModel):
 
 class Refresh(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    refresh_token: str = Field(min_length=32, max_length=256)
+    refresh_token: str | None = Field(default=None, min_length=32, max_length=256)
+
+
+REFRESH_COOKIE = 'market_refresh'
+SESSION_COOKIE = 'market_session'
+
+
+def cookie_secure():
+    return env().get('AUTH_COOKIE_SECURE', '0').lower() in {'1', 'true', 'yes'}
+
+
+def set_refresh_cookie(response, token):
+    response.set_cookie(REFRESH_COOKIE, token, max_age=7 * 24 * 60 * 60,
+        httponly=True, secure=cookie_secure(), samesite='strict', path='/api/auth')
+    # This non-secret marker lets the SPA skip an expected 401 on anonymous startup.
+    response.set_cookie(SESSION_COOKIE, '1', max_age=7 * 24 * 60 * 60,
+        httponly=False, secure=cookie_secure(), samesite='strict', path='/')
+
+
+def clear_refresh_cookie(response):
+    response.delete_cookie(REFRESH_COOKIE, httponly=True, secure=cookie_secure(),
+        samesite='strict', path='/api/auth')
+    response.delete_cookie(SESSION_COOKIE, httponly=False, secure=cookie_secure(),
+        samesite='strict', path='/')
+
+
+def refresh_value(body, request):
+    value = body.refresh_token if body and body.refresh_token else request.cookies.get(REFRESH_COOKIE)
+    if not value:
+        fail(401, 'UNAUTHENTICATED', 'Authentication failed')
+    return value
 
 
 def rate_limit(request, action):
@@ -104,7 +134,7 @@ def register(body: Register, request: Request):
 
 
 @app.post('/api/auth/login')
-def login(body: Login, request: Request):
+def login(body: Login, request: Request, response: Response):
     rate_limit(request, 'login')
     with transaction('auth') as conn:
         row = conn.execute('SELECT * FROM auth.users WHERE username=%s', (body.username.lower(),)).fetchone()
@@ -117,16 +147,18 @@ def login(body: Login, request: Request):
         fail(401, 'UNAUTHENTICATED', 'Authentication failed')
     with transaction('auth') as conn:
         result, _ = token_pair(conn, row)
+        set_refresh_cookie(response, result['refresh_token'])
         return result
 
 
 @app.post('/api/auth/refresh')
-def refresh(body: Refresh, request: Request):
+def refresh(request: Request, response: Response, body: Refresh | None = None):
     rate_limit(request, 'refresh')
+    supplied = refresh_value(body, request)
     result = None
     with transaction('auth') as conn:
         session = conn.execute('SELECT * FROM auth.refresh_sessions WHERE token_hash=%s FOR UPDATE',
-            (hashlib.sha256(body.refresh_token.encode()).hexdigest(),)).fetchone()
+            (hashlib.sha256(supplied.encode()).hexdigest(),)).fetchone()
         if session and session['revoked_at'] is not None:
             # Reuse revokes every successor in the family; commit revocation before returning 401.
             conn.execute('UPDATE auth.refresh_sessions SET revoked_at=coalesce(revoked_at,now()) WHERE family_id=%s', (session['family_id'],))
@@ -138,16 +170,20 @@ def refresh(body: Refresh, request: Request):
                              (successor, session['session_id']))
     if result is None:
         fail(401, 'UNAUTHENTICATED', 'Authentication failed')
+    set_refresh_cookie(response, result['refresh_token'])
     return result
 
 
 @app.post('/api/auth/logout')
-def logout(body: Refresh, request: Request):
+def logout(request: Request, response: Response, body: Refresh | None = None):
     rate_limit(request, 'logout')
+    supplied = body.refresh_token if body and body.refresh_token else request.cookies.get(REFRESH_COOKIE)
     with transaction('auth') as conn:
-        conn.execute('''UPDATE auth.refresh_sessions SET revoked_at=coalesce(revoked_at,now())
-            WHERE family_id IN (SELECT family_id FROM auth.refresh_sessions WHERE token_hash=%s)''',
-            (hashlib.sha256(body.refresh_token.encode()).hexdigest(),))
+        if supplied:
+            conn.execute('''UPDATE auth.refresh_sessions SET revoked_at=coalesce(revoked_at,now())
+                WHERE family_id IN (SELECT family_id FROM auth.refresh_sessions WHERE token_hash=%s)''',
+                (hashlib.sha256(supplied.encode()).hexdigest(),))
+    clear_refresh_cookie(response)
     return {'status': 'revoked'}
 
 

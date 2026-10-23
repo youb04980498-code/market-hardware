@@ -51,7 +51,7 @@ Run `scripts/start-commerce.ps1` (optionally `-WithKafka`), `scripts/verify-comm
 
 ## Validation
 
-Phase 5 runs one React application under frontend through Traefik. Run scripts/start-frontend.ps1 after commerce, then scripts/verify-frontend.ps1 and scripts/test-frontend.ps1. See docs/phase5-frontend.md and ADR 0004. Never embed DEV_* secrets in VITE_* variables. Tokens stay in memory; checkout identities persist in tab storage across uncertain network outcomes. Respect backend stock/pricing/payment authority. Run gateway restarts and live acceptance tests sequentially.
+Phase 5 runs one React application under frontend through Traefik. Run scripts/start-frontend.ps1 after commerce, then scripts/verify-frontend.ps1 and scripts/test-frontend.ps1. See docs/phase5-frontend.md and ADR 0004. Never embed DEV_* secrets in VITE_* variables. Access tokens stay in memory; refresh tokens use the Auth service's scoped HttpOnly SameSite cookie and are never read by frontend JavaScript. Checkout identities persist in tab storage across uncertain network outcomes. Respect backend stock/pricing/payment authority. Run gateway restarts and live acceptance tests sequentially.
 
 - For infrastructure edits, validate with `docker compose --env-file .env -f docker-compose.yml config --quiet`.
 - For Python dependency edits, run `.\.venv\Scripts\python.exe -m pip check` and verify affected imports.

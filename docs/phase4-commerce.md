@@ -46,7 +46,7 @@ Register accepts username, email, password (12..128 characters), first_name and 
 
 Access tokens are HS256 JWTs with required expiration, issued-at, subject, session ID, type, issuer market-hardware and audience market-commerce. The random signing key is in .env; internal service tokens use a separate key, short expiry, service subject and target audience. Every authenticated commerce request verifies JWT claims and asks Auth to check the current user/session/roles. Disabling a user or revoking a session therefore blocks existing access tokens too.
 
-Refresh tokens are high-entropy opaque secrets; PostgreSQL stores only SHA256 hashes. Rotation revokes the old session and creates a successor. Reuse of a revoked refresh token revokes the entire successor family and commits that revocation before returning a generic 401. Logout revokes the family. Password failures and unknown/disabled users share generic errors and a dummy Argon2 verification path.
+Refresh tokens are high-entropy opaque secrets; PostgreSQL stores only SHA256 hashes. Browser login and rotation set the token in a `HttpOnly`, `SameSite=Strict` cookie scoped to `/api/auth`; frontend JavaScript retains only the short-lived access token. Local loopback HTTP uses `AUTH_COOKIE_SECURE=0`; HTTPS deployments must set it to `1`. Legacy API clients may continue submitting the opaque token in the JSON body. Rotation revokes the old session and creates a successor. Reuse of a revoked refresh token revokes the entire successor family and commits that revocation before returning a generic 401. Logout revokes the family and clears the cookie. Password failures and unknown/disabled users share generic errors and a dummy Argon2 verification path.
 
 Authentication endpoints use a persisted per-source-IP, per-action minute limiter (default 60). Request validation omits submitted input values from errors. Logs never include authentication bodies or tokens. The local gateway is loopback HTTP as in Phase 3; internet deployment, certificate management, MFA, account recovery and a full abuse-protection gateway are not implemented in this local phase.
 
@@ -171,8 +171,8 @@ Created shared service code under market_commerce/, service entry points/readmes
 Verified locally on 2026-10-23 using the actual Docker services:
 
 - 231 Phase 2/3/unit regression checks passed, 0 failed/errors/skipped (includes the new 160-query concurrent selection check).
-- 45 Phase 4 integration/concurrency/recovery checks passed, 0 failed/errors/skipped.
-- Total: 276 distinct automated tests passed. Both standalone verify-commerce runs also passed their two live smoke checks, before and after operational rollback/restore.
+- 46 Phase 4 integration/concurrency/recovery/session checks passed, 0 failed/errors/skipped. The added live session check verifies HttpOnly cookie rotation, invalidation and logout clearing.
+- Total backend suite: 277 distinct automated tests passed. Both standalone verify-commerce runs also passed their two live smoke checks, before and after operational rollback/restore.
 - start-commerce.ps1 -WithKafka, test-commerce.ps1, verify-commerce.ps1 and rollback-commerce.ps1 were executed successfully on Windows PowerShell. Phase 3 remained reachable with 42 active products while commerce was stopped, then commerce was restored and verified.
 - Auth, Inventory, Orders, Payments, checkout-saga, outbox-publisher, Kafka, Traefik, the catalogue and required data/PIM services are running healthy.
 - Final audit: zero incomplete Sagas, zero unresolved product-sync jobs, 42 active catalogue products, one inactive retained product and 163 validated relationships. All 22 disabled password fixtures remain inactive.

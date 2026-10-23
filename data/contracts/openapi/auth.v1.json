@@ -117,11 +117,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Refresh"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Refresh"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -153,11 +160,18 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Refresh"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/Refresh"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -244,17 +258,21 @@
       "Refresh": {
         "properties": {
           "refresh_token": {
-            "type": "string",
-            "maxLength": 256,
-            "minLength": 32,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Refresh Token"
           }
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "refresh_token"
-        ],
         "title": "Refresh"
       },
       "Register": {

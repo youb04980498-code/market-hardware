@@ -96,6 +96,7 @@ services:
     environment:
       <<: *commerce-env
       PG_AUTH_PASSWORD: ${PG_AUTH_PASSWORD}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-0}
     depends_on:
       postgres:
         condition: service_healthy

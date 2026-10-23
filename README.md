@@ -22,7 +22,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-frontend.ps
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-frontend.ps1
 ```
 
-La boutique est accessible sur http://localhost:8080/ et l'administration sur http://localhost:8080/admin. Utiliser les comptes DEV_CUSTOMER/DEV_ADMIN du fichier `.env` local ; ne jamais intégrer leurs valeurs au bundle frontend. Les jetons restent en mémoire : un rechargement nécessite une nouvelle connexion. Voir la [documentation Phase 5](docs/phase5-frontend.md) pour les sources MIT adaptées, les routes, contrats, tests et limitations.
+La boutique est accessible sur http://localhost:8080/ et l'administration sur http://localhost:8080/admin. Utiliser les comptes DEV_CUSTOMER/DEV_ADMIN du fichier `.env` local ; ne jamais intégrer leurs valeurs au bundle frontend. Le jeton d'accès reste en mémoire et le jeton de renouvellement reste dans un cookie `HttpOnly` strict, permettant de restaurer la session après rechargement sans exposer ce secret à JavaScript. Voir la [documentation Phase 5](docs/phase5-frontend.md) pour les sources MIT adaptées, les routes, contrats, tests et limitations.
 
 Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
 

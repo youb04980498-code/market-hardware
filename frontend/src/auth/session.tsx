@@ -6,7 +6,13 @@ import {
   type ReactNode,
 } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { request, setTokens, getTokens, sessionEvents } from "../api/client";
+import {
+  request,
+  setTokens,
+  getTokens,
+  restoreSession,
+  sessionEvents,
+} from "../api/client";
 import type { User, Tokens } from "../types";
 interface Auth {
   user: User | null;
@@ -19,13 +25,30 @@ export const isStaff = (user: User | null) =>
   !!user?.roles.some((r) => r === "admin" || r === "staff");
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const listener = () => {
       if (!getTokens()) setUser(null);
     };
     sessionEvents.addEventListener("change", listener);
-    return () => sessionEvents.removeEventListener("change", listener);
+    let active = true;
+    void (async () => {
+      try {
+        if (await restoreSession()) {
+          const restored = await request<User>("/api/auth/me");
+          if (active) setUser(restored);
+        }
+      } catch {
+        setTokens(null);
+        if (active) setUser(null);
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+      sessionEvents.removeEventListener("change", listener);
+    };
   }, []);
   async function login(username: string, password: string) {
     setLoading(true);
@@ -35,7 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         { method: "POST", body: JSON.stringify({ username, password }) },
         false,
       );
-      setTokens(t);
+      setTokens({
+        access_token: t.access_token,
+        expires_in: t.expires_in,
+        token_type: t.token_type,
+      });
       setUser(await request<User>("/api/auth/me"));
     } catch (e) {
       setTokens(null);
@@ -46,18 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
   async function logout() {
-    const t = getTokens();
     setTokens(null);
     setUser(null);
-    if (t)
-      await request(
-        "/api/auth/logout",
-        {
-          method: "POST",
-          body: JSON.stringify({ refresh_token: t.refresh_token }),
-        },
-        false,
-      );
+    await request(
+      "/api/auth/logout",
+      { method: "POST", body: "{}" },
+      false,
+    );
   }
   return (
     <Context.Provider value={{ user, loading, login, logout }}>
@@ -73,8 +95,9 @@ export function Protected({
   children: ReactNode;
   admin?: boolean;
 }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const location = useLocation();
+  if (loading) return <p role="status">Restauration de la sessionâ€¦</p>;
   if (!user)
     return (
       <Navigate

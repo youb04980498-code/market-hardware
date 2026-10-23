@@ -143,6 +143,35 @@ def test_registration_login_sessions_and_rotation(commerce):
         assert conn.execute('SELECT token_hash FROM auth.refresh_sessions WHERE user_id=%s', (user['user_id'],)).fetchall()
 
 
+def test_browser_cookie_refresh_rotation_and_logout():
+    unique = str(uuid4())
+    password = 'CookieOnly-' + str(uuid4())
+    username = 'cookie-' + unique
+    request('POST', '/api/auth/register', body={'username': username, 'email': unique + '@example.test',
+        'password': password, 'first_name': 'Cookie', 'last_name': 'Session'}, expected=(201,))
+    with httpx.Client(base_url=BASE, timeout=30, trust_env=False) as browser:
+        signed_in = browser.post('/api/auth/login', json={'username': username, 'password': password})
+        assert signed_in.status_code == 200
+        first_access = signed_in.json()['access_token']
+        first_cookie = browser.cookies.get('market_refresh')
+        cookie_header = signed_in.headers['set-cookie'].lower()
+        assert first_cookie and 'httponly' in cookie_header and 'samesite=strict' in cookie_header
+        assert 'path=/api/auth' in cookie_header
+        assert browser.cookies.get('market_session') == '1'
+
+        rotated = browser.post('/api/auth/refresh', json={})
+        assert rotated.status_code == 200
+        second_access = rotated.json()['access_token']
+        assert browser.cookies.get('market_refresh') not in (None, first_cookie)
+        assert browser.get('/api/auth/me', headers={'Authorization': 'Bearer ' + first_access}).status_code == 401
+        assert browser.get('/api/auth/me', headers={'Authorization': 'Bearer ' + second_access}).status_code == 200
+
+        signed_out = browser.post('/api/auth/logout', json={})
+        assert signed_out.status_code == 200 and browser.cookies.get('market_refresh') is None
+        assert browser.cookies.get('market_session') is None
+        assert browser.get('/api/auth/me', headers={'Authorization': 'Bearer ' + second_access}).status_code == 401
+
+
 @pytest.mark.parametrize('kind', ['expired', 'issuer', 'audience'])
 def test_jwt_claim_validation(commerce, kind):
     config = commerce['config']

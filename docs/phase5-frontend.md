@@ -53,7 +53,7 @@ The primary admin menu contains exactly five sections: Overview, Orders, Catalog
 ## API mapping and security
 
 - GraphQL uses the actual `products`, `product(productId)`, `brands` and `compatibleProducts` contracts. Unsupported price sorting is explicitly explained. Product IDs remain strings until checkout; unsafe JavaScript integer conversions are rejected rather than rounded.
-- Auth uses register/login/me/refresh/logout. Access and refresh tokens remain in memory, never browser storage. Concurrent 401 responses share one refresh rotation. Revocation clears the session. Logout immediately clears local credentials. Reloading the application requires login with an internal redirect back.
+- Auth uses register/login/me/refresh/logout. The access token remains in memory; the rotating refresh token is a path-scoped `HttpOnly`, `SameSite=Strict` cookie and is unavailable to JavaScript. On application startup the cookie obtains a new access token and `/me` restores the user before protected routing resolves. Concurrent 401 responses share one refresh rotation. Revocation clears the session, and logout clears both memory and cookie credentials.
 - Inventory uses product totals and per-warehouse reads. Anonymous users are told to log in because the existing API requires authentication. Cards show actual totals after login. Checkout revalidates every line in the selected warehouse.
 - Orders uses cart/validate, keyed POST checkout, own/all-customer pagination, details and cancellation. The browser submits only product IDs, quantities and warehouse. It sends no authoritative price, amount, simulation or outcome.
 - Payment details use the authorized Payments endpoint. Orders orchestrates the simulated charge; no separate browser payment system bypasses reservations.
@@ -96,17 +96,17 @@ Reports: `.local/frontend-unit.xml`, `.local/frontend-e2e.xml`. Screenshots: `.l
 
 Phase 6 Analytics/streaming/quarterly KPIs are unavailable. No approved API exposes global PIM sync jobs, Kafka lag, tracing or capacity utilization. Inventory is read-only here; existing privileged commands remain protected by the backend. Historical committed stock is not fabricated from current quantities. Orders offers pagination but no server search/status filter, which the list explains.
 
-Phase 7 AI/solver/LLM functionality is deferred; Builder controls produce no recommendations, prices or compatibility claims. Phase 8 invoices/PDFs/email/notification workers and extended operations remain deferred. Payments are simulated. Shipping, returns and invoice UI remain limited by current contracts. Full English localization, manufacturer photography and production TLS are not claimed. Full-page refresh requires reauthentication because there is no HttpOnly cookie-session backend contract.
+Phase 7 AI/solver/LLM functionality is deferred; Builder controls produce no recommendations, prices or compatibility claims. Phase 8 invoices/PDFs/email/notification workers and extended operations remain deferred. Payments are simulated. Shipping, returns and invoice UI remain limited by current contracts. Full English localization, manufacturer photography and production TLS are not claimed. The local cookie deliberately omits `Secure` on loopback HTTP; production HTTPS must enable `AUTH_COOKIE_SECURE=1`.
 
 ## Verification results
 
 Verified locally on 2026-10-23 against actual Docker services:
 
 - 231 Phase 2/3/unit backend regressions passed; zero failures/errors/skips.
-- All 45 Phase 4 live concurrency/recovery/Kafka checks passed on the sequential rerun; zero failures/errors/skips.
+- All 46 current Phase 4 live concurrency/recovery/Kafka/session checks passed on the sequential rerun; zero failures/errors/skips.
 - 23 frontend unit/component checks passed; zero failures/errors/skips.
 - 15 real-service Chromium checks passed, covering live products/search/detail/cart, publication visibility, auth, stock, customer/admin authorization, checkout success/decline/pending recovery, ordinary server-validated checkout, deep links, responsive layouts and accessibility.
-- Total: 314 distinct automated checks passed. Repeated runs of the same checks are not counted as new tests.
+- Total current Phase 1â€“5 baseline: 315 distinct automated checks passed. Repeated runs of the same checks are not counted as new tests.
 - Lint, TypeScript checks, production build, npm audit, Compose configuration, Python dependency compatibility and PowerShell parsing passed. The final npm audit reports zero vulnerabilities.
 - The production frontend and required backend/data/PIM/Kafka services are healthy. Optional legacy services without configured health checks are only reported as running.
 - Final read-only audit: zero incomplete Sagas, zero active Phase 5 test reservations, zero pending outbox events, zero active legacy non-Argon accounts and 42 active catalogue products. Gateway storefront/deep links and runtime dependency notices returned HTTP 200; `/internal/validate` retained HTTP 404.
@@ -114,7 +114,7 @@ Verified locally on 2026-10-23 against actual Docker services:
 
 During verification, incorrect test selectors and a redundant account-navigation wait were corrected. Axe exposed mismatches between visible text and accessible link names; the application labels were fixed. One backend run was interrupted by an overlapping gateway restart during fixture setup: 231 regressions passed, then 35 Phase 4 setup errors shared the same disconnected request. With gateway operations serialized, all 45 Phase 4 checks passed. No backend business rule, original test or fixture was changed to obtain these results.
 
-start-frontend, verify-frontend (three live smoke checks) and test-frontend were executed successfully on Windows. The frontend test script used `-SkipBackend` only after the independent 276 backend checks had passed. Original business implementations, V3 requirements and all tracked source datasets remain unchanged. Source/secret scans and final Git checks are recorded with the implementation commit.
+start-frontend, verify-frontend (three live smoke checks) and test-frontend were executed successfully on Windows. The current independent backend suite contains 277 checks. Original business implementations, V3 requirements and all tracked source datasets remain unchanged. Source/secret scans and final Git checks are recorded with the implementation commits.
 
 ## Change manifest
 
