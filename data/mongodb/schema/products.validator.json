@@ -1,0 +1,346 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "required": [
+      "product_id",
+      "sku",
+      "name",
+      "brand",
+      "category",
+      "price_cents",
+      "currency",
+      "active",
+      "attributes",
+      "publication_version",
+      "source_version",
+      "published_at",
+      "source_system",
+      "validation_status",
+      "technical_validation_version"
+    ],
+    "properties": {
+      "product_id": {
+        "bsonType": "long",
+        "minimum": 1
+      },
+      "sku": {
+        "bsonType": "string",
+        "minLength": 1
+      },
+      "name": {
+        "bsonType": "string",
+        "minLength": 1
+      },
+      "brand": {
+        "bsonType": "string",
+        "minLength": 1
+      },
+      "category": {
+        "enum": [
+          "CPU",
+          "MOTHERBOARD",
+          "RAM",
+          "GPU",
+          "SSD",
+          "PSU",
+          "CASE",
+          "COOLER",
+          "PERIPHERAL"
+        ]
+      },
+      "price_cents": {
+        "bsonType": "long",
+        "minimum": 0
+      },
+      "currency": {
+        "bsonType": "string",
+        "pattern": "^[A-Z]{3}$"
+      },
+      "active": {
+        "bsonType": "bool"
+      },
+      "attributes": {
+        "bsonType": "object",
+        "properties": {
+          "socket": {
+            "bsonType": "string",
+            "minLength": 1
+          },
+          "memory_type": {
+            "bsonType": "string",
+            "minLength": 1
+          },
+          "form_factor": {
+            "bsonType": "string",
+            "minLength": 1
+          },
+          "interface": {
+            "bsonType": "string",
+            "minLength": 1
+          },
+          "efficiency": {
+            "bsonType": "string",
+            "minLength": 1
+          },
+          "tdp_w": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "board_power_w": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "performance_score": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "m2_slots": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "sata_ports": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "bios_generation": {
+            "bsonType": "long",
+            "minimum": 0
+          },
+          "capacity_gb": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "modules": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "max_memory_gb": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "length_mm": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "height_mm": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "cooling_capacity_w": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "max_gpu_length_mm": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "max_cooler_height_mm": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "wattage_w": {
+            "bsonType": "long",
+            "minimum": 1
+          },
+          "sockets": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+              "minLength": 1
+            }
+          },
+          "motherboard_forms": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+              "minLength": 1
+            }
+          },
+          "power_connectors": {
+            "bsonType": "array",
+            "items": {
+              "bsonType": "string",
+              "minLength": 1
+            }
+          },
+          "integrated_gpu": {
+            "bsonType": "bool"
+          },
+          "gpu_connectors": {
+            "bsonType": "object",
+            "additionalProperties": {
+              "bsonType": "long",
+              "minimum": 0
+            }
+          }
+        }
+      },
+      "publication_version": {
+        "bsonType": "long",
+        "minimum": 1
+      },
+      "source_version": {
+        "bsonType": [
+          "string",
+          "long"
+        ]
+      },
+      "published_at": {
+        "bsonType": "date"
+      },
+      "source_system": {
+        "bsonType": "string",
+        "minLength": 1
+      },
+      "validation_status": {
+        "enum": [
+          "APPROVED"
+        ]
+      },
+      "technical_validation_version": {
+        "bsonType": "string",
+        "minLength": 1
+      }
+    },
+    "oneOf": [
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "CPU"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "socket",
+              "tdp_w",
+              "memory_type"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "MOTHERBOARD"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "socket",
+              "memory_type",
+              "form_factor",
+              "max_memory_gb",
+              "m2_slots",
+              "sata_ports"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "RAM"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "memory_type",
+              "capacity_gb",
+              "modules"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "GPU"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "board_power_w",
+              "length_mm",
+              "power_connectors"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "SSD"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "capacity_gb",
+              "interface"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "PSU"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "wattage_w",
+              "gpu_connectors"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "CASE"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "motherboard_forms",
+              "max_gpu_length_mm",
+              "max_cooler_height_mm"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "COOLER"
+            ]
+          },
+          "attributes": {
+            "required": [
+              "sockets",
+              "height_mm",
+              "cooling_capacity_w"
+            ]
+          }
+        }
+      },
+      {
+        "properties": {
+          "category": {
+            "enum": [
+              "PERIPHERAL"
+            ]
+          }
+        }
+      }
+    ]
+  }
+}

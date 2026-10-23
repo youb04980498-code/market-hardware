@@ -1,0 +1,6 @@
+[
+  {"name": "product_id_unique", "keys": [["product_id", 1]], "unique": true},
+  {"name": "sku_unique", "keys": [["sku", 1]], "unique": true},
+  {"name": "category_brand", "keys": [["category", 1], ["brand", 1], ["active", 1]]},
+  {"name": "publication_version", "keys": [["source_version", 1], ["publication_version", 1]]}
+]

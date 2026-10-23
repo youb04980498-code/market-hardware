@@ -1,3 +1,4 @@
+// Legacy manual CSV entry point. Phase 2 uses import_v3.cypher through data/seeds/phase2.py.
 // Neo4j Community; copy CSVs into Neo4j's import directory.
 // Relationship labels are kept as 'relation_type' properties to avoid dynamic Cypher.
 CREATE CONSTRAINT product_id_unique IF NOT EXISTS FOR (p:Product) REQUIRE p.product_id IS UNIQUE;

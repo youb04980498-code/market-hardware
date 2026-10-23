@@ -29,6 +29,10 @@ Vendor/BIOS/firmware support has **not** been externally verified.
 python data/scripts/validate_dataset.py
 ```
 
+## Phase 2 automated import
+
+Run `scripts/initialize-data.ps1` from the repository root. It applies the actual migrations, maps CSV fields and imports all three databases without copying CSVs into containers. Run `scripts/verify-data.ps1` to repeat live validation. Placeholder auth users are imported inactive. See [Phase 2 details](../docs/phase2-database-setup.md). The manual notes below describe fixture semantics; the automated runner is the supported entry point.
+
 ## Import order / notes
 
 1. Apply your **actual** PostgreSQL V3 migrations first. These CSV files are logical fixtures,

@@ -2,7 +2,7 @@
 
 ## Current state
 
-This repository contains the project scaffold, the reference architecture, and working local infrastructure. Application services, frontend, contracts, table definitions, seed generation, pipelines, and application tests remain to be implemented. Keep documentation explicit about that status.
+This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Application services, frontend, contracts, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
 
 Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
 
@@ -42,6 +42,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
 Required phase-one services are PostgreSQL, MongoDB, Neo4j and UnoPim with its dependencies. Kafka is deferred and enabled only with -WithKafka. Existing Redis and MinIO infrastructure remain available. Prometheus and Grafana use the optional `monitoring` profile. MinIO is built from its pinned official source commit in `infrastructure/minio/Dockerfile`.
 
 Compose retains the `market-hardware` project name and named volumes from the original local setup. Reuse its local `.env` when working with those existing volumes. Keep `.env`, virtual environments, dependencies, checkpoints and generated data out of Git.
+
+Run `scripts/initialize-data.ps1` to migrate, seed and validate the local databases; run `scripts/verify-data.ps1` for live database tests. The importer reads and adds generated service credentials directly in the ignored `.env`. See `docs/phase2-database-setup.md`.
 
 ## Validation
 

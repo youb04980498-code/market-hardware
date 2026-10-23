@@ -6,7 +6,7 @@ Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, ca
 
 Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est différé sous le profil optionnel `kafka` ; Prometheus et Grafana utilisent `monitoring`.
 
-Les sources de données synthétiques sont suivies dans Git sous `data/`. Les services métier, le frontend, l'IA, les contrats applicatifs, les tables SQL et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
+Les sources de données synthétiques sont suivies dans Git sous `data/`. Les services métier, le frontend, l'IA, les contrats applicatifs, les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
@@ -40,7 +40,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1 -
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-market.ps1
 ```
 
-L'arrêt conserve les volumes. Le démarrage par défaut arrête un éventuel Kafka existant sans supprimer son volume. Les fichiers SQL et MongoDB sous `data/postgres/schema/` et `data/mongodb/schema/` sont des points de départ ; ils ne sont pas exécutés automatiquement. GitHub conserve le code, les fixtures et la documentation ; l'exécution, les secrets et les bases restent locaux.
+L'arrêt conserve les volumes. Le démarrage par défaut arrête un éventuel Kafka existant sans supprimer son volume. Les migrations et imports Phase 2 sont exécutés explicitement avec `scripts/initialize-data.ps1`, séparément du démarrage des conteneurs. GitHub conserve le code, les fixtures et la documentation ; l'exécution, les secrets et les bases restent locaux.
 
 ## Accès à l'infrastructure
 
@@ -49,7 +49,7 @@ Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPi
 | Service | Adresse locale |
 | --- | --- |
 | PostgreSQL | `127.0.0.1:5432`, base `market_db` |
-| MongoDB | `127.0.0.1:27017`, catalogue prévu dans `market_catalog` |
+| MongoDB | `127.0.0.1:27017`, catalogue dans `market_catalog` |
 | Kafka, clients Windows (profil kafka) | `127.0.0.1:9092` |
 | Kafka, autres conteneurs (profil kafka) | `kafka:19092` |
 | Redis | `127.0.0.1:6379` |
@@ -91,3 +91,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
 ```
 
 Le vérificateur échoue avec un code non nul si un service requis est absent, arrêté, sans santé `healthy`, sans son volume attendu ou inaccessible. Il exécute une requête PostgreSQL authentifiée, un ping MongoDB authentifié, une requête Neo4j authentifiée et vérifie `/up` et la page de connexion UnoPim. Ces contrôles portent sur le socle technique ; les parcours métier et pipelines restent à valider séparément dans [le plan de validation](docs/demo-validation.md).
+
+## Phase 2 : bases et données
+
+Les migrations PostgreSQL, la validation MongoDB et le graphe Neo4j sont implémentés et chargés depuis `data/`. Les identifiants locaux sont lus et générés directement dans `.env`, ignoré par Git.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\initialize-data.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-data.ps1
+```
+
+Voir [les mappings, contrôles et limites Phase 2](docs/phase2-database-setup.md).
