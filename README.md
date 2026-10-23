@@ -4,13 +4,13 @@ Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, ca
 
 ## État du dépôt
 
-Le dépôt est initialisé avec l'arborescence du projet et l'infrastructure locale fonctionnelle : PostgreSQL 16, MongoDB 7, Kafka 4.1.2, Redis 7 et MinIO. Prometheus et Grafana sont disponibles via le profil optionnel `monitoring`.
+Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est différé sous le profil optionnel `kafka` ; Prometheus et Grafana utilisent `monitoring`.
 
-Les services métier, le frontend, les contrats, les tables SQL, les données de démonstration, les pipelines et les tests applicatifs restent à développer. Les répertoires réservés sont suivis dans Git avec des fichiers `.gitkeep`.
+Les sources de données synthétiques sont suivies dans Git sous `data/`. Les services métier, le frontend, l'IA, les contrats applicatifs, les tables SQL et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
-La V3 ajoute UnoPim et sa base dédiée, Neo4j Community, Ollama/Qwen, Mailpit, la synchronisation produit, les workers de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces composants et flux restent à implémenter ; le Compose actuel couvre le socle décrit ci-dessus.
+La cible V3 comprend aussi Ollama/Qwen, la synchronisation produit, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Aucun service frontend, IA ou Spark n'est démarré à cette étape.
 
 Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
 
@@ -22,7 +22,7 @@ Prérequis : Docker Desktop avec conteneurs Linux, Git, Python 3.12, Node.js LTS
 cd C:\market-hardware
 # Crée .venv et installe les dépendances Python ; génère .env s'il est absent.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-market.ps1 -SkipPackages -SkipContainers
-# Démarre les cinq services d'infrastructure.
+# Démarre l'infrastructure locale, attend la santé des conteneurs puis vérifie les connexions.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
 ```
@@ -35,10 +35,12 @@ Pour activer la supervision ou arrêter les services :
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1 -WithMonitoring
+# Kafka seulement lors de la future phase événementielle :
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1 -WithKafka
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-market.ps1
 ```
 
-L'arrêt conserve les volumes. Les fichiers SQL et MongoDB sont des points de départ pour le développement ; ils ne sont pas exécutés automatiquement au démarrage.
+L'arrêt conserve les volumes. Le démarrage par défaut arrête un éventuel Kafka existant sans supprimer son volume. Les fichiers SQL et MongoDB sous `data/postgres/schema/` et `data/mongodb/schema/` sont des points de départ ; ils ne sont pas exécutés automatiquement. GitHub conserve le code, les fixtures et la documentation ; l'exécution, les secrets et les bases restent locaux.
 
 ## Accès à l'infrastructure
 
@@ -48,8 +50,8 @@ Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPi
 | --- | --- |
 | PostgreSQL | `127.0.0.1:5432`, base `market_db` |
 | MongoDB | `127.0.0.1:27017`, catalogue prévu dans `market_catalog` |
-| Kafka, clients Windows | `127.0.0.1:9092` |
-| Kafka, autres conteneurs | `kafka:19092` |
+| Kafka, clients Windows (profil kafka) | `127.0.0.1:9092` |
+| Kafka, autres conteneurs (profil kafka) | `kafka:19092` |
 | Redis | `127.0.0.1:6379` |
 | Neo4j Browser / Bolt | <http://localhost:7474> / `127.0.0.1:7687` |
 | UnoPim | <http://localhost:8000/admin> |
@@ -63,18 +65,19 @@ Les mots de passe sont dans `.env`, jamais dans Git. Les ports sont liés à l'i
 
 ## Organisation
 
-L'organisation ci-dessous décrit le scaffold actuel. L'arborescence cible V3 figure au §16 du cahier des charges ; sa migration reste à réaliser avec les implémentations.
+Le scaffold suit les répertoires du §16 V3. Le fichier Compose racine reste le point d'entrée ; `infrastructure/compose/README.md` documente cette convention. Les fixtures catalogue gardent leur chemin `data/catalog/` et `data/mongodb/` réserve les schémas/imports MongoDB.
 
 | Répertoire | Responsabilité |
 | --- | --- |
-| `contracts/` | Contrats OpenAPI, GraphQL et événements Kafka |
-| `database/` | Schémas, tables, migrations, catalogue et génération de données |
-| `services/` | Six services : orders, inventory, payments, catalog, auth et analytics |
-| `eventing/` | Publisher outbox et générateur de clics |
-| `pipelines/` | Batch, streaming, qualité et lakehouse |
+| `data/contracts/` | Contrats OpenAPI, GraphQL et événements Kafka |
+| `data/` | Fixtures, schémas PostgreSQL/MongoDB, contrats et emplacement seeds |
+| `services/` | Placeholders auth, orders, inventory, payments, catalog-graphql, analytics et ai-assistant |
+| `workers/` | Placeholders product-sync, outbox-publisher, invoice, notifications et log-retention |
+| `pipelines/` | Placeholders spark-streaming, spark-batch-quarterly, qualité et lakehouse |
 | `frontend/src/features/` | Overview, orders, catalog, logistics et observability |
 | `infrastructure/` | Traefik, Prometheus, Grafana, OpenTelemetry et build MinIO |
-| `tests/` | Unitaires, contrats, intégration, E2E et reprise |
+| `tests/` | Placeholders unit, contracts, integration, e2e et acceptance |
+| `.github/workflows/` | Emplacement réservé aux futurs workflows |
 | `docs/` | Architecture, ADR, dictionnaire, API et validation de démonstration |
 | `scripts/` | Installation, démarrage, arrêt et vérification Windows |
 
@@ -83,7 +86,8 @@ L'organisation ci-dessous décrit le scaffold actuel. L'arborescence cible V3 fi
 ```powershell
 docker compose --env-file .env.example -f docker-compose.yml config --quiet
 docker compose -f docker-compose.yml ps
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
 .\.venv\Scripts\python.exe -m pip check
 ```
 
-Ces vérifications portent sur le socle technique. Le scénario métier, les pipelines Spark/Delta et les critères de reprise doivent être implémentés et vérifiés séparément dans [le plan de validation](docs/demo-validation.md).
+Le vérificateur échoue avec un code non nul si un service requis est absent, arrêté, sans santé `healthy`, sans son volume attendu ou inaccessible. Il exécute une requête PostgreSQL authentifiée, un ping MongoDB authentifié, une requête Neo4j authentifiée et vérifie `/up` et la page de connexion UnoPim. Ces contrôles portent sur le socle technique ; les parcours métier et pipelines restent à valider séparément dans [le plan de validation](docs/demo-validation.md).

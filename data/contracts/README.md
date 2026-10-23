@@ -1,6 +1,6 @@
 # Contrats
 
-Les contrats seront définis avant ou avec leurs implémentations conformément au [cahier des charges V3](../docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md), §§7 et 10. Aucun service métier n'est encore implémenté.
+Les contrats seront définis avant ou avec leurs implémentations conformément au [cahier des charges V3](../../docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md), §§7 et 10. Aucun service métier n'est encore implémenté.
 
 - `openapi/` : commandes, disponibilités, paiements simulés, authentification, analytique trimestrielle et assistant IA ; exemples V3 sous `/api/...`, plus `/health` et OpenAPI `/docs`.
 - `graphql/` : catalogue Strawberry en lecture via `/graphql`, requêtes `products`, `product(productId)` et `categories`, pagination et limites de complexité. L'édition produit appartient au PIM.

@@ -14,6 +14,12 @@ services:
       - "127.0.0.1:7687:7687"
     volumes:
       - neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'RETURN 1;\\n' | cypher-shell -u neo4j -p \"$${NEO4J_AUTH#*/}\" >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
     restart: unless-stopped
   postgres:
     image: postgres:16-alpine
@@ -41,9 +47,16 @@ services:
       - "127.0.0.1:27017:27017"
     volumes:
       - mongodata:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --username \"$$MONGO_INITDB_ROOT_USERNAME\" --password \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --eval 'quit(db.adminCommand({ping:1}).ok === 1 ? 0 : 1)' >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     restart: unless-stopped
 
   kafka:
+    profiles: [kafka]
     image: apache/kafka:4.1.2
     ports:
       - "127.0.0.1:9092:9092"

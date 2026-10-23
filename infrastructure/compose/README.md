@@ -1,0 +1,1 @@
+The entry point is the repository-root docker-compose.yml so local .env and relative mounts remain consistent. It includes ../unopim/compose.yaml. Kafka uses the optional kafka profile; frontend, AI and Spark services are not implemented.

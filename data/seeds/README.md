@@ -1,0 +1,1 @@
+Source fixtures live in the sibling catalog/, pim/, postgres/, neo4j/, kafka/, ai/ and scenarios/ directories. Run python data/scripts/validate_dataset.py from the project root. This directory reserves the V3 location for a future deterministic generator.

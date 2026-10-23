@@ -85,12 +85,11 @@ if (-not $SkipContainers) {
        if ($LASTEXITCODE -ne 0) {
            Write-Warning 'Docker Engine is not running. Start Docker Desktop (Linux containers) then run .\scripts\start-market.ps1.'
        } else {
-           $args = @('compose','--project-name','market-hardware','-f','docker-compose.yml')
-           if ($WithMonitoring) { $args += @('--profile','monitoring') }
-           $args += @('up','-d','--pull','missing')
-           & docker @args
-           if ($LASTEXITCODE -ne 0) { throw 'Docker compose failed. Check port conflicts and Docker Desktop resources.' }
-           Write-Host 'Containers requested. Run .\scripts\verify-market.ps1 to inspect readiness.' -ForegroundColor Green
+           $startArgs = @('-NoProfile','-ExecutionPolicy','Bypass','-File',(Join-Path $PSScriptRoot 'start-market.ps1'))
+           if ($WithMonitoring) { $startArgs += '-WithMonitoring' }
+           & powershell.exe @startArgs
+           if ($LASTEXITCODE -ne 0) { throw 'Local infrastructure health or connectivity verification failed.' }
+           Write-Host 'Local infrastructure health and connectivity verified.' -ForegroundColor Green
        }
     }
 }
