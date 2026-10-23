@@ -4,20 +4,30 @@
 
 This repository contains the project scaffold, the reference architecture, and working local infrastructure. Application services, frontend, contracts, table definitions, seed generation, pipelines, and application tests remain to be implemented. Keep documentation explicit about that status.
 
-Read `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` before implementing a component. Record material architecture changes in `docs/ADR/` and update the affected contracts and documentation with the implementation.
+Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
+
+The current layout and Compose stack are the V1 scaffold. Migrate toward the V3 target layout in section 16 as components are implemented. UnoPim, Neo4j, Ollama/Qwen, Mailpit, product synchronization, invoicing, notifications, log retention and quarterly processing remain requirements to implement.
 
 ## Architecture conventions
 
 - Backend: Python 3.12, FastAPI, Pydantic, SQLAlchemy and Alembic; Strawberry GraphQL for the catalog.
 - Frontend: React, TypeScript, Vite, Tailwind CSS and Recharts, organized around the five feature directories.
-- PostgreSQL uses one `market_db` database with `orders`, `inventory`, `payments`, and `auth` schemas. Each service owns its schema and must use a distinct, restricted database role when implemented.
+- PostgreSQL uses one `market_db` database with exactly four business schemas: `orders`, `inventory`, `payments`, and `auth`. A technical `monitoring` schema is allowed for logs. Each service owns its schema and must use a distinct, restricted database role when implemented.
 - Do not add SQL foreign keys, joins, or direct database reads across service boundaries. Catalog data belongs in MongoDB `market_catalog.products`.
-- Reuse the catalog's numeric `product_id` throughout SQL, events, API responses and the lakehouse. MongoDB `_id` is not a business identifier.
+- UnoPim owns product descriptions and attributes. A synchronization worker publishes approved, versioned products to MongoDB and validated compatibility relationships to Neo4j. The PIM database is separate from `market_db`; stock belongs to Inventory.
+- Reuse stable numeric `product_id` values throughout PIM, MongoDB, Neo4j, SQL, events and the lakehouse. Use consistent BSON Int64 IDs and prices in MongoDB. MongoDB `_id` is not a business identifier.
 - Represent money as integer cents and timestamps as UTC ISO 8601 / PostgreSQL `TIMESTAMPTZ`.
-- Develop REST, GraphQL, and event contracts alongside implementations. Version APIs and Kafka topics.
+- Develop functional REST, GraphQL and event contracts alongside implementations. V3 REST examples use `/api/...`; catalog reads use `/graphql` with `products`, `product(productId)` and `categories`. Public GraphQL must not mutate catalog products; authoring belongs in the PIM.
+- The V3 event envelope contains `event_id`, `event_type`, `version`, `aggregate_id`, `occurred_at`, `payload` and `correlation_id`. Final topic names and versioning must be fixed in contracts.
 - Publish business events through a transactional outbox. Implement idempotence, bounded retries, compensation and duplicate handling where required by the architecture.
 - Payments are simulated. Keep synthetic seed data deterministic and separate from live activity.
 - Frontend business values must come from actual services. Provide loading, empty and error states.
+- Implement unique invoices for eligible successful payments, PDF storage in MinIO and replay-safe Mailpit notifications through workers and transactional events. PostgreSQL triggers must never call external services.
+- Implement replay-safe quarterly batch aggregates plus event-time streaming, quality checks and four lakehouse zones. A local Spark job does not validate these pipelines.
+- Purge only technical logs older than seven days on a weekly schedule. Preserve commercial records and financial audit trails; record purge start/end/count/status.
+- The local AI assistant uses read-only parameterized Neo4j retrieval, verified relation provenance and current price/stock APIs. Do not grant unrestricted SQL/Cypher execution or database writes to the model; missing compatibility evidence means unknown.
+- V3 requires a deterministic Python PC Build Solver behind the AI Assistant API. Return a complete BOM, exact integer-cent totals and remaining budget, compatibility evidence and price/stock check timestamps. Unknown critical constraints must never count as compatible; return `no_feasible_build` when constraints cannot be met.
+- Support `POST /api/ai/builds` and optionally `GET /api/ai/builds/{build_id}` when builds are persisted. Qwen interprets preferences and explains solver output; it is not the solver. Revalidate prices and stock at checkout; a suggested build does not reserve stock. Verify AC-23 through AC-27, including physical fit, firmware, slots, quantities and power connectors.
 
 ## Local development
 

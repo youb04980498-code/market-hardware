@@ -8,7 +8,11 @@ Le dépôt est initialisé avec l'arborescence du projet et l'infrastructure loc
 
 Les services métier, le frontend, les contrats, les tables SQL, les données de démonstration, les pipelines et les tests applicatifs restent à développer. Les répertoires réservés sont suivis dans Git avec des fichiers `.gitkeep`.
 
-La référence technique est [l'architecture du projet](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md). Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
+La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
+
+La V3 ajoute UnoPim et sa base dédiée, Neo4j Community, Ollama/Qwen, Mailpit, la synchronisation produit, les workers de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces composants et flux restent à implémenter ; le Compose actuel couvre le socle décrit ci-dessus.
+
+Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
 
 ## Démarrage local sous Windows
 
@@ -53,6 +57,8 @@ L'arrêt conserve les volumes. Les fichiers SQL et MongoDB sont des points de d�
 Les mots de passe sont dans `.env`, jamais dans Git. Les ports sont liés à l'interface locale pour le développement.
 
 ## Organisation
+
+L'organisation ci-dessous décrit le scaffold actuel. L'arborescence cible V3 figure au §16 du cahier des charges ; sa migration reste à réaliser avec les implémentations.
 
 | Répertoire | Responsabilité |
 | --- | --- |

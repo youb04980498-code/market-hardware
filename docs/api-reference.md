@@ -1,14 +1,17 @@
 # Référence API
 
-Les interfaces ci-dessous sont prévues par l'architecture. Les services, contrats détaillés, opérations, modèles et règles d'autorisation ne sont pas encore implémentés.
+Les interfaces ci-dessous sont prévues par le [cahier des charges V3](MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md), §§6–7. Les services, contrats détaillés, opérations, modèles et règles d'autorisation ne sont pas encore implémentés.
 
 | Service | Interface prévue | Données |
 | --- | --- | --- |
-| `orders-api` | REST `/v1/orders` | Schéma PostgreSQL `orders` |
-| `inventory-api` | REST `/v1/inventory`, `/v1/warehouses` | Schéma PostgreSQL `inventory` |
-| `payments-api` | REST interne `/v1/payments` | Schéma PostgreSQL `payments` |
+| `orders-api` | REST `/api/orders`, `/api/orders/{id}`, `/api/orders/{id}/cancel` | Schéma PostgreSQL `orders` |
+| `inventory-api` | REST `/api/inventory/availability/{product_id}` | Schéma PostgreSQL `inventory` |
+| `payments-api` | REST `/api/payments` | Schéma PostgreSQL `payments` |
 | `catalog-api` | GraphQL `/graphql` | MongoDB `market_catalog.products` |
-| `auth-api` | REST `/v1/auth` | Schéma PostgreSQL `auth` |
-| `analytics-api` | REST `/v1/dashboard`, `/v1/analytics` | Redis et tables analytiques |
+| `auth-api` | REST `/api/auth/login` | Schéma PostgreSQL `auth` |
+| `analytics-api` | REST `/api/analytics/quarterly?year=2026&quarter=3` | Redis et tables analytiques |
+| Assistant IA et solver | POST `/api/ai/chat`, POST `/api/ai/builds` ; GET `/api/ai/builds/{build_id}` si persisté | Neo4j en lecture contrôlée, Catalog GraphQL, Inventory REST et solver Python |
 
-Les contrats seront versionnés dans `contracts/openapi/` et `contracts/graphql/`. Les appels frontend passeront par la gateway. Le paiement reste un service interne simulé. Les permissions REST et GraphQL seront documentées avec les réponses `401` et `403` et les règles d'idempotence.
+Les contrats seront versionnés dans `contracts/openapi/` et `contracts/graphql/`. Les appels frontend passeront par la gateway. Les paiements sont simulés. Prévoir `/health`, OpenAPI `/docs`, JWT/RBAC et contrôle de propriété, réponses `401`/`403`, pagination et idempotence.
+
+Le catalogue GraphQL public est en lecture : `products`, `product(productId)` et `categories`, avec limites de complexité. Les mutations produit appartiennent au PIM. Le solver retourne BOM, total exact en centimes, budget restant, preuves, horodatages prix/stock, avertissements et alternatives ; aucune compatibilité critique inconnue ne peut être déclarée validée.

@@ -7,3 +7,5 @@
 *.pdf binary
 # Preserve the imported reference document's Markdown hard line breaks.
 docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md whitespace=-blank-at-eol
+docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md whitespace=-blank-at-eol
+docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md whitespace=-blank-at-eol

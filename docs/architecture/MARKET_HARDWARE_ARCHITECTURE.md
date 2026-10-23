@@ -1,5 +1,7 @@
 # Market Hardware — Architecture technique et composition du projet
 
+> **Historique V1.** Le [cahier des charges V3](../MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md) est désormais la référence du projet et prévaut en cas de divergence. Ce document conserve les choix initiaux ; il ne décrit pas l'ensemble de la cible V3 ni son état d'implémentation.
+
 **Statut :** spécification technique de référence (proposition V1)  
 **Périmètre :** plateforme de pilotage d'un e-commerce de matériel informatique  
 **Hors périmètre de ce document :** planning, répartition des tâches et responsabilités
