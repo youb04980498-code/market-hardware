@@ -89,13 +89,17 @@ export default function Dashboard() {
         </Card>
         <Card>
           <CardHeader>
-            <CardDescription>Phase 6 · non disponible</CardDescription>
+            <CardDescription>
+              Analytics · projection matérialisée
+            </CardDescription>
             <CardTitle>Chiffre d'affaires et tendances</CardTitle>
           </CardHeader>
           <CardContent>
-            <strong className="metric">—</strong>
-            <p>Aucun KPI inventé avant l'API Analytics.</p>
-            <Link to="/admin/analytics">État de l'intégration</Link>
+            <p>
+              Captures, remboursements, cohortes UTC et fraîcheur de la
+              projection.
+            </p>
+            <Link to="/admin/analytics">Consulter les analyses</Link>
           </CardContent>
         </Card>
       </div>
@@ -118,18 +122,13 @@ export default function Dashboard() {
     </div>
   );
 }
-export function Deferred({
-  kind,
-}: {
-  kind: "analytics" | "ai" | "observability";
-}) {
+export function Deferred({ kind }: { kind: "ai" | "observability" }) {
   return (
     <div className="admin-page">
       <p className="eyebrow">INTÉGRATION TRANSPARENTE</p>
       <h1>
         {
           {
-            analytics: "Analytics",
             ai: "AI PC Builder",
             observability: "Observabilité",
           }[kind]
@@ -153,14 +152,11 @@ export function Deferred({
         </>
       ) : (
         <section className="panel">
-          <span className="pill">
-            PHASE {kind === "analytics" ? "6" : "7"} · À VENIR
-          </span>
+          <span className="pill">PHASE 7 · À VENIR</span>
           <h2>Service non disponible</h2>
           <p>
-            {kind === "analytics"
-              ? "Les agrégats temps réel et trimestriels nécessitent les pipelines et l'API Analytics."
-              : "Les diagnostics et configurations nécessitent le solveur déterministe et l'API AI."}
+            Les diagnostics et configurations nécessitent le solveur
+            déterministe et l'API AI.
           </p>
           <p>
             Aucune donnée de démonstration n'est utilisée pour remplacer cette

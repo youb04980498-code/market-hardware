@@ -6,6 +6,9 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
+      tabIndex={0}
+      role="region"
+      aria-label="Tableau défilant"
       className="cn-table-container relative w-full overflow-x-auto"
     >
       <table

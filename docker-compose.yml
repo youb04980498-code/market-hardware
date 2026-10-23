@@ -25,6 +25,59 @@ x-commerce: &commerce
     retries: 5
     start_period: 30s
 services:
+  analytics-worker:
+    profiles: [analytics]
+    image: market-hardware/analytics:phase6
+    build:
+      context: .
+      dockerfile: pipelines/lakehouse/Dockerfile
+    command: [python, -m, market_analytics.worker]
+    environment:
+      PG_HOST: postgres
+      PG_ANALYTICS_READER_PASSWORD: ${PG_ANALYTICS_READER_PASSWORD:-}
+      PG_ANALYTICS_WRITER_PASSWORD: ${PG_ANALYTICS_WRITER_PASSWORD:-}
+      ANALYTICS_PSEUDONYM_KEY: ${ANALYTICS_PSEUDONYM_KEY:-}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      ANALYTICS_S3_ENDPOINT: http://minio:9000
+      ANALYTICS_CATALOG_URL: http://catalog-graphql:8080/graphql
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+      JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2
+      PYSPARK_SUBMIT_ARGS: --driver-memory 1g pyspark-shell
+      ANALYTICS_TESTING: ${ANALYTICS_TESTING:-0}
+      ANALYTICS_REFRESH_SECONDS: ${ANALYTICS_REFRESH_SECONDS:-60}
+    mem_limit: 2500m
+    cpus: 2.0
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -m, market_analytics.cli, health]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 600s
+  analytics:
+    profiles: [analytics]
+    image: market-hardware/analytics:phase6
+    build:
+      context: .
+      dockerfile: pipelines/lakehouse/Dockerfile
+    command: [uvicorn, market_analytics.api:app, --host, 0.0.0.0, --port, '8080']
+    environment:
+      PG_HOST: postgres
+      PG_ANALYTICS_API_PASSWORD: ${PG_ANALYTICS_API_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET}
+      AUTH_URL: http://auth:8080
+      ANALYTICS_STALE_SECONDS: ${ANALYTICS_STALE_SECONDS:-180}
+      ANALYTICS_LOW_STOCK_THRESHOLD: ${ANALYTICS_LOW_STOCK_THRESHOLD:-5}
+    mem_limit: 384m
+    cpus: 0.5
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=5)"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
   frontend:
     profiles: [frontend]
     image: market-hardware/frontend:phase5

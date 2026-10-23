@@ -333,12 +333,12 @@ test("session logout clears client state and deep-link refresh preserves router"
     page.getByRole("button", { name: "Génération indisponible" }),
   ).toBeDisabled();
 });
-test("unavailable future integrations never fabricate metrics", async ({
+test("analytics uses materialized data and future integrations remain explicit", async ({
   page,
 }) => {
   await login(page, "ADMIN", "/admin/analytics");
   await expect(
-    page.getByRole("heading", { name: "Service non disponible" }),
+    page.getByRole("heading", { name: "Pipeline et rapprochement" }),
   ).toBeVisible();
   await page.getByRole("link", { name: "AI PC Builder", exact: true }).click();
   await expect(

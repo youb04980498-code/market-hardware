@@ -10,3 +10,8 @@
 data/postgres/pgdata
 data/mongodb/db
 data/neo4j/data
+
+**/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report

@@ -6,11 +6,11 @@ Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, ca
 
 Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est optionnel sous les profils `kafka`/`streaming` et publie les événements transactionnels quand il est activé ; Prometheus et Grafana utilisent `monitoring`.
 
-Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM, le publisher outbox et l'application React boutique/administration sont implémentés. Analytics, l'IA et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence seule ne signifie pas qu'une application est développée.
+Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM, le publisher outbox et l'application React boutique/administration sont implémentés. La Phase 6 ajoute Analytics, Spark Structured Streaming, Delta sur MinIO et les rapports trimestriels. L'IA et les workers de facturation restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence seule ne signifie pas qu'une application est développée.
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
-La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Le frontend dispose du profil Compose `frontend` ; aucun service IA ou Spark n'est démarré à cette étape.
+La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Le frontend dispose du profil Compose `frontend` ; Spark utilise le profil optionnel analytics ; aucun service IA n'est démarré.
 
 ## Boutique et administration — Phase 5
 
@@ -137,3 +137,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-commerce.ps1
 ```
 
 Sans `-WithKafka`, les événements restent durablement en attente. Les identifiants de développement sont générés directement dans `.env`, ignoré par Git ; les comptes fixtures restent désactivés. [Architecture, endpoints, sécurité, reprise et limites](docs/phase4-commerce.md).
+
+## Analytics — Phase 6
+
+La page http://localhost:8080/admin/analytics expose les données matérialisées avec contrôle des rôles et fraîcheur explicite. Démarrer avec `scripts/start-analytics.ps1`, vérifier avec `scripts/verify-analytics.ps1`, tester les reprises avec `scripts/test-analytics.ps1 -WithRecovery`, et arrêter avec `scripts/stop-analytics.ps1`. Le backfill est en lecture seule ; les checkpoints et données Delta restent dans MinIO. Voir [architecture, commandes et limites](docs/phase6-analytics.md) et [résultats mesurés](docs/phase6-execution.md).

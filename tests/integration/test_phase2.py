@@ -44,7 +44,11 @@ def test_postgres_counts_and_schema_boundaries(connection):
         for expected_row in db.sql_rows(source):
             keys = db.KEYS[table]
             actual = connection.execute('SELECT * FROM '+table+' WHERE '+' AND '.join(k+'=%s' for k in keys), [expected_row[k] for k in keys]).fetchone()
-            assert actual and all(db.canonical(actual[k]) == db.canonical(v) for k,v in expected_row.items())
+            mutable = {'quantity', 'reserved_quantity'} if table == 'inventory.stock' else set()
+            assert actual and all(
+                k in mutable or db.canonical(actual[k]) == db.canonical(v)
+                for k, v in expected_row.items()
+            )
     schemas = connection.execute("SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname NOT IN ('public','information_schema')").fetchall()
     assert {row['nspname'] for row in schemas} == {'auth','orders','inventory','payments','monitoring'}
     assert not connection.execute('''SELECT 1 FROM pg_constraint c JOIN pg_class a ON a.oid=c.conrelid

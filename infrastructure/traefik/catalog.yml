@@ -1,5 +1,10 @@
 http:
   routers:
+    analytics:
+      rule: PathPrefix(`/api/analytics`)
+      entryPoints: [web]
+      service: analytics
+      middlewares: [catalog-limit]
     frontend:
       rule: PathPrefix(`/`) && !PathPrefix(`/api`) && !PathPrefix(`/graphql`) && !PathPrefix(`/internal`) && !PathPrefix(`/health`)
       priority: 1
@@ -36,6 +41,10 @@ http:
       service: catalogue
       middlewares: [health-path]
   services:
+    analytics:
+      loadBalancer:
+        servers:
+          - url: http://analytics:8080
     frontend:
       loadBalancer:
         servers:

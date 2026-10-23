@@ -23,6 +23,12 @@ export class ApiError extends Error {
   }
 }
 const messages: Record<string, string> = {
+  ANALYTICS_NOT_READY:
+    "Aucune version analytique complète n'est disponible. Réessayez après le traitement.",
+  AUTH_UNAVAILABLE:
+    "Le service d'authentification est temporairement indisponible.",
+  QUARTER_NOT_MATERIALIZED:
+    "Ce trimestre doit être calculé avec le script de traitement local.",
   UNAUTHENTICATED:
     "Session expirée ou identifiants incorrects. Connectez-vous.",
   RATE_LIMITED: "Trop de tentatives. Réessayez dans une minute.",

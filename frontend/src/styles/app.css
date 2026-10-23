@@ -1,4 +1,57 @@
 @import "tailwindcss";
+.analytics-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  margin: 24px 0;
+}
+.analytics-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.analytics-filters .check {
+  flex-direction: row;
+  align-items: center;
+  min-height: 44px;
+}
+.analytics-filters input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  flex-shrink: 0;
+}
+.analytics-metrics {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+}
+.analytics-chart {
+  height: 320px;
+  width: 100%;
+  min-width: 0;
+  margin: 24px 0;
+}
+.analytics-warning {
+  border: 2px solid var(--error);
+}
+.analytics-page nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.analytics-page details {
+  margin: 16px 0;
+}
+.analytics-page summary {
+  cursor: pointer;
+  padding: 12px 0;
+}
+.analytics-page .panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 @theme {
   --color-card: #fff;
   --color-card-foreground: #14221d;

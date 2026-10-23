@@ -1,0 +1,42 @@
+[
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.5.7/spark-sql-kafka-0-10_2.12-3.5.7.jar",
+    "sha512": "343946b39720b90258d102a0820393103b43ee48c01292bda30ee0345c2429fcc7c9c0990cadcac94dd3bd99b4cd25ae39d62a8a6cf6ce25f074948e9d88a895"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/spark/spark-token-provider-kafka-0-10_2.12/3.5.7/spark-token-provider-kafka-0-10_2.12-3.5.7.jar",
+    "sha512": "e5389ac89f1865a53cd5cfdf07e2d5b44e2ba94780b71795ab575bf1e73e0550b988a76dd91fd28a36c0e97fb5bc018ad63f4b3dfe8c050913b8afec47594fe0"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/kafka/kafka-clients/3.4.1/kafka-clients-3.4.1.jar",
+    "sha512": "b111e1980fd6bf65ca546f6b517fb31a140b19b4dc88646e723b11b54b521e48643f33aa341f47b3111a4556af131200f80c851e1b68d37cb4e747e283eefd7e"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar",
+    "sha512": "7177d8a9e45ae47881ec323150dc7bd3372ce32eff9866029b47a77cb734535d5e987f22e6cb7009104832c3772079fb6322b2919650765b76a4b4aa8eae648e"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar",
+    "sha512": "399510f759fb48255c6298f3545c9b644372fbc9d7245e80e6b51f49da0ac9275d104092c537ac047d5a1312c7d191dee8d655ca8d760b59ce1452bf4370a6e0"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/io/delta/delta-spark_2.12/3.3.2/delta-spark_2.12-3.3.2.jar",
+    "sha512": "0599674293c8719f7a90c658e53aec59ac12b0a95f78dc272b91dcdd90fb43df15f6dccf537fa64990295c45b0112b8091b3081ee41dc654f35c2346e65b988b"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/io/delta/delta-storage/3.3.2/delta-storage-3.3.2.jar",
+    "sha512": "2004d9d0eb7634a722a548c718555fdcb70593354df9332ae51691f01faebbaffd92211fac88498d2e90b4b54aa47c56a0e96ba3a8201372d86d805a323e4d01"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/antlr/antlr4-runtime/4.9.3/antlr4-runtime-4.9.3.jar",
+    "sha512": "2c3763a8fbc7af110df5d6bb57692759b23e8bf961a53694c69bde4cd9d8c3a8eaa55cf376ce34c6c4e2035a99d7abf08c6ffa3b75d18a6d93a9c1ca95927ea8"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar",
+    "sha512": "b48a67a6af0b9885c05459b81d97ec07c30e30f889f6730966771d6a6d70cb3e856c29661b17c16a62a07044a4655467d682147b52a89651a137d146181fc284"
+  },
+  {
+    "url": "https://repo.maven.apache.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar",
+    "sha512": "4231e69dfc4b952575579d5310e97abfc931f44f2184a71ce2072970d12623200f3adb346fea131c75c515188f665ae7912d2516becc14307cda144acb52e3f6"
+  }
+]

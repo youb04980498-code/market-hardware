@@ -23,6 +23,7 @@ const Deferred = lazy(() =>
 const Orders = lazy(() => import("./admin/pages/Orders"));
 const AdminCatalog = lazy(() => import("./admin/pages/Catalog"));
 const Inventory = lazy(() => import("./admin/pages/Inventory"));
+const Analytics = lazy(() => import("./admin/pages/Analytics"));
 export default function App() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function App() {
           <Route path="orders/:id" element={<Detail />} />
           <Route path="catalog" element={<AdminCatalog />} />
           <Route path="inventory" element={<Inventory />} />
-          <Route path="analytics" element={<Deferred kind="analytics" />} />
+          <Route path="analytics" element={<Analytics />} />
           <Route
             path="observability"
             element={<Deferred kind="observability" />}

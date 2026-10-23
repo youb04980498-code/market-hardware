@@ -270,7 +270,11 @@ def seed_sql(connection):
                 if filename == 'stock':
                     # Reservation INSERT triggers materialize the aggregate. Never reset an existing row.
                     initial = dict(record, reserved_quantity=0)
-                    insert_preserving(connection, table, initial, ignore=['reserved_quantity'])
+                    # Runtime commerce can legitimately change both stock counters after
+                    # the immutable Phase 2 fixture has been loaded. Re-importing seed
+                    # data must preserve those business changes rather than treating a
+                    # fulfilled order as fixture corruption.
+                    insert_preserving(connection, table, initial, ignore=['quantity', 'reserved_quantity'])
                 else:
                     insert_preserving(connection, table, record)
         for source in read_csv('monitoring/application_logs.csv'):

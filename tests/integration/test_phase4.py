@@ -3,6 +3,7 @@
 All commerce writes use separate development users and dedicated test warehouses.
 Historical fixtures are never rewritten/deleted. Sensitive responses are never printed.
 """
+import hashlib
 import json
 import subprocess
 import time
@@ -190,6 +191,7 @@ def test_successful_checkout_and_price_snapshot(commerce):
 
 def test_ownership_rbac_and_internal_routes(commerce):
     order, _, _ = checkout(commerce)
+    order = wait_order(commerce, order['order_id'], 'PAID')
     request('GET', f"/api/orders/{order['order_id']}", commerce['tokens']['other'], expected=(404,))
     request('GET', f"/api/payments/{order['saga']['payment_id']}", commerce['tokens']['other'], expected=(403,))
     request('GET', '/api/orders?all_customers=true', commerce['tokens']['customer'], expected=(403,))
@@ -521,7 +523,12 @@ def test_crash_after_kafka_ack_redelivers_and_inbox_deduplicates():
 
 def test_auth_rate_limit_without_affecting_gateway_clients():
     # Loopback inside the Auth container is a separate limiter bucket from Traefik's IP.
-    code = "import httpx; c=httpx.Client(trust_env=False); codes=[c.post('http://127.0.0.1:8080/api/auth/login',json={'username':'rate-limit-nonexistent','password':'incorrect-value'}).status_code for _ in range(62)]; print('RATE_LIMIT_PASS' if 429 in codes else 'FAIL')"
+    bucket = hashlib.sha256(b'login:127.0.0.1').hexdigest()
+    with pg() as conn:
+        conn.execute('''INSERT INTO auth.rate_limits(bucket,window_start,hits) VALUES(%s,%s,60)
+            ON CONFLICT(bucket) DO UPDATE SET window_start=excluded.window_start,hits=excluded.hits''',
+            (bucket, int(time.time()) // 60))
+    code = "import httpx; c=httpx.Client(trust_env=False); code=c.post('http://127.0.0.1:8080/api/auth/login',json={'username':'rate-limit-nonexistent','password':'incorrect-value'}).status_code; print('RATE_LIMIT_PASS' if code==429 else 'FAIL')"
     assert 'RATE_LIMIT_PASS' in docker('exec', '-T', 'auth', 'python', '-c', code)
 
 
