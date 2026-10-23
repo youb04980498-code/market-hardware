@@ -1,0 +1,40 @@
+[
+  {
+    "scenario_id": "SAGA-FAIL-001",
+    "order_id": 99001,
+    "customer_id": 1,
+    "product_id": 1001,
+    "quantity": 1,
+    "warehouse_id": 1,
+    "amount_cents": 18900,
+    "payment_result": "DECLINED",
+    "expected_events": [
+      "order.created",
+      "inventory.reserved",
+      "payment.failed",
+      "inventory.reservation_released",
+      "order.cancelled"
+    ],
+    "expected_final_status": "CANCELLED"
+  },
+  {
+    "scenario_id": "SAGA-RETRY-002",
+    "order_id": 99002,
+    "customer_id": 2,
+    "product_id": 1002,
+    "quantity": 1,
+    "warehouse_id": 2,
+    "amount_cents": 27500,
+    "payment_result": "SUCCEEDED",
+    "expected_events": [
+      "order.created",
+      "inventory.reserved",
+      "payment.succeeded",
+      "invoice.ready",
+      "notification.sent"
+    ],
+    "expected_final_status": "PAID",
+    "replay_count": 2,
+    "expected_invoice_count": 1
+  }
+]

@@ -1,0 +1,973 @@
+[
+  {
+    "product_id": 1001,
+    "sku": "MH-CPU-1001",
+    "name": "Ryzen 5 7600",
+    "brand": "AMD",
+    "category": "CPU",
+    "price_cents": 18900,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "tdp_w": 65,
+      "performance_score": 78,
+      "memory_type": "DDR5",
+      "integrated_gpu": true
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1001-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1002,
+    "sku": "MH-CPU-1002",
+    "name": "Ryzen 7 7700",
+    "brand": "AMD",
+    "category": "CPU",
+    "price_cents": 27500,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "tdp_w": 65,
+      "performance_score": 88,
+      "memory_type": "DDR5",
+      "integrated_gpu": true
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1002-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1003,
+    "sku": "MH-CPU-1003",
+    "name": "Ryzen 7 7800X3D",
+    "brand": "AMD",
+    "category": "CPU",
+    "price_cents": 35900,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "tdp_w": 120,
+      "performance_score": 97,
+      "memory_type": "DDR5",
+      "integrated_gpu": true
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1003-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1004,
+    "sku": "MH-CPU-1004",
+    "name": "Core i5-12400F",
+    "brand": "Intel",
+    "category": "CPU",
+    "price_cents": 13500,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "tdp_w": 65,
+      "performance_score": 69,
+      "memory_type": "DDR4",
+      "integrated_gpu": false
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1004-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1005,
+    "sku": "MH-CPU-1005",
+    "name": "Core i5-13400F",
+    "brand": "Intel",
+    "category": "CPU",
+    "price_cents": 19900,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "tdp_w": 148,
+      "performance_score": 77,
+      "memory_type": "DDR4",
+      "integrated_gpu": false
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1005-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1006,
+    "sku": "MH-CPU-1006",
+    "name": "Core i7-12700F",
+    "brand": "Intel",
+    "category": "CPU",
+    "price_cents": 26500,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "tdp_w": 180,
+      "performance_score": 84,
+      "memory_type": "DDR4",
+      "integrated_gpu": false
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1006-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1007,
+    "sku": "MH-MOT-1007",
+    "name": "B650M PRO",
+    "brand": "MSI",
+    "category": "MOTHERBOARD",
+    "price_cents": 13900,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "memory_type": "DDR5",
+      "form_factor": "mATX",
+      "bios_generation": 1,
+      "m2_slots": 2,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1007-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1008,
+    "sku": "MH-MOT-1008",
+    "name": "TUF B650 PLUS",
+    "brand": "ASUS",
+    "category": "MOTHERBOARD",
+    "price_cents": 18900,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "memory_type": "DDR5",
+      "form_factor": "ATX",
+      "bios_generation": 1,
+      "m2_slots": 3,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1008-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1009,
+    "sku": "MH-MOT-1009",
+    "name": "B650I AORUS",
+    "brand": "Gigabyte",
+    "category": "MOTHERBOARD",
+    "price_cents": 20900,
+    "active": true,
+    "attributes": {
+      "socket": "AM5",
+      "memory_type": "DDR5",
+      "form_factor": "ITX",
+      "bios_generation": 1,
+      "m2_slots": 2,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1009-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1010,
+    "sku": "MH-MOT-1010",
+    "name": "B660M DDR4",
+    "brand": "MSI",
+    "category": "MOTHERBOARD",
+    "price_cents": 10900,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "memory_type": "DDR4",
+      "form_factor": "mATX",
+      "bios_generation": 1,
+      "m2_slots": 2,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1010-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1011,
+    "sku": "MH-MOT-1011",
+    "name": "PRIME B760 DDR4",
+    "brand": "ASUS",
+    "category": "MOTHERBOARD",
+    "price_cents": 13900,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "memory_type": "DDR4",
+      "form_factor": "ATX",
+      "bios_generation": 2,
+      "m2_slots": 3,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1011-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1012,
+    "sku": "MH-MOT-1012",
+    "name": "H610M DDR4",
+    "brand": "ASRock",
+    "category": "MOTHERBOARD",
+    "price_cents": 7900,
+    "active": true,
+    "attributes": {
+      "socket": "LGA1700",
+      "memory_type": "DDR4",
+      "form_factor": "mATX",
+      "bios_generation": 1,
+      "m2_slots": 1,
+      "sata_ports": 4,
+      "max_memory_gb": 128
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1012-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1013,
+    "sku": "MH-RAM-1013",
+    "name": "FURY 16GB DDR5",
+    "brand": "Kingston",
+    "category": "RAM",
+    "price_cents": 5900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR5",
+      "capacity_gb": 16,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1013-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1014,
+    "sku": "MH-RAM-1014",
+    "name": "Vengeance 32GB DDR5",
+    "brand": "Corsair",
+    "category": "RAM",
+    "price_cents": 9900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR5",
+      "capacity_gb": 32,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1014-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1015,
+    "sku": "MH-RAM-1015",
+    "name": "Ripjaws 64GB DDR5",
+    "brand": "G.Skill",
+    "category": "RAM",
+    "price_cents": 18900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR5",
+      "capacity_gb": 64,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1015-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1016,
+    "sku": "MH-RAM-1016",
+    "name": "FURY 16GB DDR4",
+    "brand": "Kingston",
+    "category": "RAM",
+    "price_cents": 3900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR4",
+      "capacity_gb": 16,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1016-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1017,
+    "sku": "MH-RAM-1017",
+    "name": "Vengeance 32GB DDR4",
+    "brand": "Corsair",
+    "category": "RAM",
+    "price_cents": 6900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR4",
+      "capacity_gb": 32,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1017-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1018,
+    "sku": "MH-RAM-1018",
+    "name": "Ripjaws 64GB DDR4",
+    "brand": "G.Skill",
+    "category": "RAM",
+    "price_cents": 13900,
+    "active": true,
+    "attributes": {
+      "memory_type": "DDR4",
+      "capacity_gb": 64,
+      "modules": 2
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1018-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1019,
+    "sku": "MH-GPU-1019",
+    "name": "Radeon RX 7600",
+    "brand": "AMD",
+    "category": "GPU",
+    "price_cents": 24900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 165,
+      "length_mm": 245,
+      "performance_score": 72,
+      "power_connectors": [
+        "8pin"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1019-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1020,
+    "sku": "MH-GPU-1020",
+    "name": "GeForce RTX 4060",
+    "brand": "NVIDIA",
+    "category": "GPU",
+    "price_cents": 28900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 115,
+      "length_mm": 240,
+      "performance_score": 75,
+      "power_connectors": [
+        "8pin"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1020-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1021,
+    "sku": "MH-GPU-1021",
+    "name": "Radeon RX 7700 XT",
+    "brand": "AMD",
+    "category": "GPU",
+    "price_cents": 40900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 245,
+      "length_mm": 305,
+      "performance_score": 86,
+      "power_connectors": [
+        "8pin",
+        "8pin"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1021-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1022,
+    "sku": "MH-GPU-1022",
+    "name": "GeForce RTX 4070",
+    "brand": "NVIDIA",
+    "category": "GPU",
+    "price_cents": 52900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 200,
+      "length_mm": 285,
+      "performance_score": 91,
+      "power_connectors": [
+        "12vhpwr"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1022-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1023,
+    "sku": "MH-GPU-1023",
+    "name": "Radeon RX 7800 XT",
+    "brand": "AMD",
+    "category": "GPU",
+    "price_cents": 49900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 263,
+      "length_mm": 320,
+      "performance_score": 94,
+      "power_connectors": [
+        "8pin",
+        "8pin"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1023-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1024,
+    "sku": "MH-GPU-1024",
+    "name": "GeForce RTX 3050",
+    "brand": "NVIDIA",
+    "category": "GPU",
+    "price_cents": 18900,
+    "active": true,
+    "attributes": {
+      "board_power_w": 130,
+      "length_mm": 230,
+      "performance_score": 55,
+      "power_connectors": [
+        "8pin"
+      ]
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1024-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1025,
+    "sku": "MH-SSD-1025",
+    "name": "Blue SN580 500GB",
+    "brand": "WD",
+    "category": "SSD",
+    "price_cents": 4900,
+    "active": true,
+    "attributes": {
+      "capacity_gb": 500,
+      "interface": "NVMe"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1025-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1026,
+    "sku": "MH-SSD-1026",
+    "name": "Black SN770 1TB",
+    "brand": "WD",
+    "category": "SSD",
+    "price_cents": 7900,
+    "active": true,
+    "attributes": {
+      "capacity_gb": 1000,
+      "interface": "NVMe"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1026-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1027,
+    "sku": "MH-SSD-1027",
+    "name": "990 EVO 2TB",
+    "brand": "Samsung",
+    "category": "SSD",
+    "price_cents": 14900,
+    "active": true,
+    "attributes": {
+      "capacity_gb": 2000,
+      "interface": "NVMe"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1027-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1028,
+    "sku": "MH-SSD-1028",
+    "name": "MX500 1TB",
+    "brand": "Crucial",
+    "category": "SSD",
+    "price_cents": 8500,
+    "active": true,
+    "attributes": {
+      "capacity_gb": 1000,
+      "interface": "SATA"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1028-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1029,
+    "sku": "MH-SSD-1029",
+    "name": "NV2 1TB",
+    "brand": "Kingston",
+    "category": "SSD",
+    "price_cents": 6900,
+    "active": true,
+    "attributes": {
+      "capacity_gb": 1000,
+      "interface": "NVMe"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1029-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1030,
+    "sku": "MH-PSU-1030",
+    "name": "CX550",
+    "brand": "Corsair",
+    "category": "PSU",
+    "price_cents": 6900,
+    "active": true,
+    "attributes": {
+      "wattage_w": 550,
+      "gpu_connectors": {
+        "8pin": 2,
+        "12vhpwr": 0
+      },
+      "efficiency": "80PLUS"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1030-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1031,
+    "sku": "MH-PSU-1031",
+    "name": "Pure Power 12M 650W",
+    "brand": "be quiet!",
+    "category": "PSU",
+    "price_cents": 10900,
+    "active": true,
+    "attributes": {
+      "wattage_w": 650,
+      "gpu_connectors": {
+        "8pin": 2,
+        "12vhpwr": 1
+      },
+      "efficiency": "80PLUS"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1031-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1032,
+    "sku": "MH-PSU-1032",
+    "name": "RM750e",
+    "brand": "Corsair",
+    "category": "PSU",
+    "price_cents": 11900,
+    "active": true,
+    "attributes": {
+      "wattage_w": 750,
+      "gpu_connectors": {
+        "8pin": 3,
+        "12vhpwr": 1
+      },
+      "efficiency": "80PLUS"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1032-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1033,
+    "sku": "MH-PSU-1033",
+    "name": "Focus GX850",
+    "brand": "Seasonic",
+    "category": "PSU",
+    "price_cents": 15900,
+    "active": true,
+    "attributes": {
+      "wattage_w": 850,
+      "gpu_connectors": {
+        "8pin": 4,
+        "12vhpwr": 1
+      },
+      "efficiency": "80PLUS"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1033-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1034,
+    "sku": "MH-PSU-1034",
+    "name": "MWE 450",
+    "brand": "Cooler Master",
+    "category": "PSU",
+    "price_cents": 4900,
+    "active": true,
+    "attributes": {
+      "wattage_w": 450,
+      "gpu_connectors": {
+        "8pin": 1,
+        "12vhpwr": 0
+      },
+      "efficiency": "80PLUS"
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1034-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1035,
+    "sku": "MH-CAS-1035",
+    "name": "Pop Mini Air",
+    "brand": "Fractal",
+    "category": "CASE",
+    "price_cents": 8900,
+    "active": true,
+    "attributes": {
+      "motherboard_forms": [
+        "mATX",
+        "ITX"
+      ],
+      "max_gpu_length_mm": 365,
+      "max_cooler_height_mm": 170
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1035-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1036,
+    "sku": "MH-CAS-1036",
+    "name": "4000D Airflow",
+    "brand": "Corsair",
+    "category": "CASE",
+    "price_cents": 10900,
+    "active": true,
+    "attributes": {
+      "motherboard_forms": [
+        "ATX",
+        "mATX",
+        "ITX"
+      ],
+      "max_gpu_length_mm": 360,
+      "max_cooler_height_mm": 170
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1036-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1037,
+    "sku": "MH-CAS-1037",
+    "name": "NR200",
+    "brand": "Cooler Master",
+    "category": "CASE",
+    "price_cents": 9500,
+    "active": true,
+    "attributes": {
+      "motherboard_forms": [
+        "ITX"
+      ],
+      "max_gpu_length_mm": 330,
+      "max_cooler_height_mm": 155
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1037-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1038,
+    "sku": "MH-CAS-1038",
+    "name": "H5 Flow",
+    "brand": "NZXT",
+    "category": "CASE",
+    "price_cents": 9900,
+    "active": true,
+    "attributes": {
+      "motherboard_forms": [
+        "ATX",
+        "mATX",
+        "ITX"
+      ],
+      "max_gpu_length_mm": 365,
+      "max_cooler_height_mm": 165
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1038-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1039,
+    "sku": "MH-COO-1039",
+    "name": "AK400",
+    "brand": "DeepCool",
+    "category": "COOLER",
+    "price_cents": 3900,
+    "active": true,
+    "attributes": {
+      "sockets": [
+        "AM5",
+        "LGA1700"
+      ],
+      "height_mm": 155,
+      "cooling_capacity_w": 180
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1039-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1040,
+    "sku": "MH-COO-1040",
+    "name": "NH-U12S",
+    "brand": "Noctua",
+    "category": "COOLER",
+    "price_cents": 7900,
+    "active": true,
+    "attributes": {
+      "sockets": [
+        "AM5",
+        "LGA1700"
+      ],
+      "height_mm": 158,
+      "cooling_capacity_w": 200
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1040-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1041,
+    "sku": "MH-COO-1041",
+    "name": "Pure Rock Slim 2",
+    "brand": "be quiet!",
+    "category": "COOLER",
+    "price_cents": 2900,
+    "active": true,
+    "attributes": {
+      "sockets": [
+        "LGA1700"
+      ],
+      "height_mm": 135,
+      "cooling_capacity_w": 120
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1041-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  },
+  {
+    "product_id": 1042,
+    "sku": "MH-COO-1042",
+    "name": "Peerless Assassin 120",
+    "brand": "Thermalright",
+    "category": "COOLER",
+    "price_cents": 4500,
+    "active": true,
+    "attributes": {
+      "sockets": [
+        "AM5"
+      ],
+      "height_mm": 157,
+      "cooling_capacity_w": 230
+    },
+    "publication_version": 1,
+    "currency": "EUR",
+    "source_version": "pim-1042-v1",
+    "published_at": "2026-10-01T08:00:00Z",
+    "validation_status": "APPROVED",
+    "technical_validation_version": "rules-v3-1",
+    "source_system": "UnoPim"
+  }
+]

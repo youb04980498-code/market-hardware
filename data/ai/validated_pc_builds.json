@@ -1,0 +1,106 @@
+[
+  {
+    "build_id": "BUILD-01",
+    "budget_cents": 100000,
+    "total_cents": 95200,
+    "components": {
+      "CPU": 1001,
+      "MOTHERBOARD": 1007,
+      "RAM": 1014,
+      "GPU": 1019,
+      "SSD": 1026,
+      "PSU": 1030,
+      "CASE": 1035,
+      "COOLER": 1039
+    },
+    "validated_rules": [
+      "cpu_socket",
+      "memory_generation",
+      "case_form_factor",
+      "gpu_clearance",
+      "cooler_clearance",
+      "cooler_socket",
+      "cooling_capacity",
+      "psu_wattage_25pct_headroom",
+      "gpu_psu_connectors"
+    ]
+  },
+  {
+    "build_id": "BUILD-02",
+    "budget_cents": 160000,
+    "total_cents": 151800,
+    "components": {
+      "CPU": 1002,
+      "MOTHERBOARD": 1008,
+      "RAM": 1015,
+      "GPU": 1021,
+      "SSD": 1027,
+      "PSU": 1032,
+      "CASE": 1036,
+      "COOLER": 1040
+    },
+    "validated_rules": [
+      "cpu_socket",
+      "memory_generation",
+      "case_form_factor",
+      "gpu_clearance",
+      "cooler_clearance",
+      "cooler_socket",
+      "cooling_capacity",
+      "psu_wattage_25pct_headroom",
+      "gpu_psu_connectors"
+    ]
+  },
+  {
+    "build_id": "BUILD-03",
+    "budget_cents": 80000,
+    "total_cents": 73800,
+    "components": {
+      "CPU": 1004,
+      "MOTHERBOARD": 1010,
+      "RAM": 1017,
+      "GPU": 1024,
+      "SSD": 1025,
+      "PSU": 1030,
+      "CASE": 1035,
+      "COOLER": 1041
+    },
+    "validated_rules": [
+      "cpu_socket",
+      "memory_generation",
+      "case_form_factor",
+      "gpu_clearance",
+      "cooler_clearance",
+      "cooler_socket",
+      "cooling_capacity",
+      "psu_wattage_25pct_headroom",
+      "gpu_psu_connectors"
+    ]
+  },
+  {
+    "build_id": "BUILD-04",
+    "budget_cents": 110000,
+    "total_cents": 107200,
+    "components": {
+      "CPU": 1005,
+      "MOTHERBOARD": 1011,
+      "RAM": 1017,
+      "GPU": 1020,
+      "SSD": 1026,
+      "PSU": 1031,
+      "CASE": 1036,
+      "COOLER": 1040
+    },
+    "validated_rules": [
+      "cpu_socket",
+      "memory_generation",
+      "case_form_factor",
+      "gpu_clearance",
+      "cooler_clearance",
+      "cooler_socket",
+      "cooling_capacity",
+      "psu_wattage_25pct_headroom",
+      "gpu_psu_connectors"
+    ]
+  }
+]

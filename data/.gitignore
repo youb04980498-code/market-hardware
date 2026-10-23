@@ -1,0 +1,20 @@
+# Keep seed data tracked: do NOT ignore data/ or seeds/
+.env
+.env.*
+!.env.example
+__pycache__/
+.pytest_cache/
+*.py[cod]
+node_modules/
+dist/
+.venv/
+# Runtime volumes / generated lakehouse data
+infrastructure/volumes/
+volumes/
+runtime/
+/postgres/pgdata/
+/mongodb/db/
+/neo4j/data/
+/minio/objects/
+/lakehouse/_checkpoints/
+*.log

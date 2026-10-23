@@ -1,0 +1,161 @@
+[
+  {
+    "case_id": "MISSING-GPU-DIMENSION",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "UNKNOWN_SPECIFICATION"
+    },
+    "override_attributes": {
+      "GPU": {
+        "length_mm": null
+      }
+    }
+  },
+  {
+    "case_id": "UNVERIFIED-BIOS",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "UNKNOWN",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "UNKNOWN_BIOS"
+    }
+  },
+  {
+    "case_id": "MISSING-BIOS-REVISION",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "UNKNOWN_BIOS"
+    }
+  },
+  {
+    "case_id": "BIOS-UPDATE-NEEDED",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 1
+    },
+    "expected": {
+      "status": "BIOS_UPDATE_REQUIRED"
+    }
+  },
+  {
+    "case_id": "VERIFIED-SYNTHETIC-BUILD",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "READY",
+      "total_cents": 95200,
+      "remaining_cents": 4800
+    }
+  },
+  {
+    "case_id": "PRICE-INCREASE-OVER-BUDGET",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "BUDGET_EXCEEDED",
+      "total_cents": 105200,
+      "remaining_cents": -5200
+    },
+    "current_prices_cents": {
+      "1001": 28900
+    }
+  },
+  {
+    "case_id": "PRICE-CHANGE-RECONFIRM",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "REQUOTE_REQUIRED",
+      "total_cents": 96200,
+      "remaining_cents": 3800
+    },
+    "current_prices_cents": {
+      "1001": 19900
+    }
+  },
+  {
+    "case_id": "PRICE-DECREASE-RECONFIRM",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "REQUOTE_REQUIRED",
+      "total_cents": 94200,
+      "remaining_cents": 5800
+    },
+    "current_prices_cents": {
+      "1001": 17900
+    }
+  },
+  {
+    "case_id": "STOCK-CHANGED",
+    "build_id": "BUILD-01",
+    "firmware": {
+      "cpu_id": 1001,
+      "motherboard_id": 1007,
+      "source": "synthetic_firmware_fixture_v1",
+      "validation_status": "SYNTHETIC_VERIFIED",
+      "minimum_revision": 2,
+      "installed_revision": 2
+    },
+    "expected": {
+      "status": "STOCK_UNAVAILABLE"
+    },
+    "current_available": {
+      "1001": 0
+    }
+  }
+]

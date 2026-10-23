@@ -1,0 +1,77 @@
+[
+  {
+    "case_id": "BAD-SOCKET",
+    "components": {
+      "CPU": 1001,
+      "MOTHERBOARD": 1010
+    },
+    "expected_error": "CPU_SOCKET_MISMATCH"
+  },
+  {
+    "case_id": "BAD-RAM",
+    "components": {
+      "MOTHERBOARD": 1007,
+      "RAM": 1016
+    },
+    "expected_error": "RAM_GENERATION_MISMATCH"
+  },
+  {
+    "case_id": "BAD-CASE",
+    "components": {
+      "MOTHERBOARD": 1008,
+      "CASE": 1037
+    },
+    "expected_error": "CASE_FORM_FACTOR_MISMATCH"
+  },
+  {
+    "case_id": "BAD-GPU-LENGTH",
+    "components": {
+      "GPU": 1023,
+      "CASE": 1037
+    },
+    "expected_error": "GPU_CASE_CLEARANCE",
+    "override_attributes": {
+      "GPU": {
+        "length_mm": 380
+      }
+    }
+  },
+  {
+    "case_id": "BAD-COOLER-SOCKET",
+    "components": {
+      "CPU": 1001,
+      "COOLER": 1041
+    },
+    "expected_error": "COOLER_SOCKET_MISMATCH"
+  },
+  {
+    "case_id": "BAD-COOLER-CAPACITY",
+    "components": {
+      "CPU": 1006,
+      "COOLER": 1041
+    },
+    "expected_error": "COOLER_CAPACITY_INSUFFICIENT"
+  },
+  {
+    "case_id": "BAD-PSU-WATTAGE",
+    "components": {
+      "CPU": 1003,
+      "GPU": 1023,
+      "PSU": 1034
+    },
+    "expected_error": "PSU_WATTAGE_INSUFFICIENT"
+  },
+  {
+    "case_id": "BAD-PSU-CONNECTOR",
+    "components": {
+      "GPU": 1022,
+      "PSU": 1030
+    },
+    "expected_error": "GPU_POWER_CONNECTORS_MISSING"
+  },
+  {
+    "case_id": "BAD-BUDGET",
+    "budget_cents": 10000,
+    "expected_error": "NO_FEASIBLE_BUILD"
+  }
+]

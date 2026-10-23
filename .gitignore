@@ -26,7 +26,13 @@ test-results/
 
 # Local service and pipeline data
 .local/
-data/
+# Track reproducible seed sources; exclude generated runtime storage.
+/data/postgres/pgdata/
+/data/mongodb/db/
+/data/neo4j/data/
+/data/minio/objects/
+/data/lakehouse/_checkpoints/
+/data/runtime/
 checkpoints/
 spark-warehouse/
 derby.log
