@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+.local
+.venv
+**/__pycache__
+**/.env
+**/.env.*
+*.log
+data/postgres/pgdata
+data/mongodb/db
+data/neo4j/data

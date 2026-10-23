@@ -188,16 +188,25 @@ def configure_catalog(client):
 def preflight_projections(client, nodes, edges):
     for document in products():
         existing = client.market_catalog.products.find_one({'product_id': document['product_id']}, {'_id': 0})
+        if existing and existing.get('publication_digest'):
+            # Phase 3 transfers projection ownership to approved UnoPim revisions.
+            # Historical fixtures must never roll those revisions back.
+            continue
         if existing and any(canonical(existing.get(k)) != canonical(v) for k, v in document.items()):
             raise RuntimeError('MongoDB seed conflict for product ' + str(document['product_id']))
     existing_nodes = {row['id']: row['props'] for row in query('MATCH (p:Product) RETURN p.product_id AS id, properties(p) AS props')}
+    managed = {pid for pid, props in existing_nodes.items() if props.get('publication_digest')}
     for node in nodes:
         existing = existing_nodes.get(node['product_id'])
+        if node['product_id'] in managed:
+            continue
         if existing and any(existing.get(k) != v for k, v in node['properties'].items()):
             raise RuntimeError('Neo4j seed conflict for product ' + str(node['product_id']))
     existing_edges = {(row['a'],row['b'],row['props'].get('rule'),row['props'].get('relation_type')): row['props']
                       for row in query('MATCH (a:Product)-[r:COMPATIBLE]->(b:Product) RETURN a.product_id AS a,b.product_id AS b,properties(r) AS props')}
     for edge in edges:
+        if edge['from_id'] in managed or edge['to_id'] in managed:
+            continue
         existing = existing_edges.get((edge['from_id'],edge['to_id'],edge['rule'],edge['relation_type']))
         if existing and any(existing.get(k) != v for k, v in edge['properties'].items()):
             raise RuntimeError('Neo4j compatibility metadata conflicts with seed')

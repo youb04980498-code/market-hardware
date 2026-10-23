@@ -140,11 +140,16 @@ def test_service_login_isolation(schema):
 def test_catalog_validation_indexes_and_metadata():
     with db.mongo() as client:
         collection = client.market_catalog.products
-        assert collection.count_documents({}) == 42
-        assert collection.count_documents({'product_id': {'$type':'long'}, 'price_cents': {'$type':'long'}}) == 42
+        count = collection.count_documents({})
+        assert count >= 42
+        assert collection.count_documents({'product_id': {'$type':'long'}, 'price_cents': {'$type':'long'}}) == count
         for expected in db.products():
             actual = collection.find_one({'product_id':expected['product_id']}, {'_id':0})
-            assert db.canonical(actual) == db.canonical(expected)
+            assert actual is not None
+            if actual['publication_version'] == 1:
+                assert all(db.canonical(actual.get(k)) == db.canonical(v) for k,v in expected.items())
+            else:
+                assert actual.get('publication_digest') and actual.get('sync_state') == 'READY'
         assert collection.index_information()['sku_unique']['unique']
         assert collection.index_information()['product_id_unique']['unique']
         invalid = copy.deepcopy(db.products()[0])
@@ -163,17 +168,35 @@ def test_graph_and_cross_database_ids(connection):
     nodes, edges = db.graph_data()
     actual_nodes = {row['id']:row['props'] for row in db.query('MATCH (p:Product) RETURN p.product_id AS id,properties(p) AS props')}
     with db.mongo() as client:
-        mongo_ids = set(client.market_catalog.products.distinct('product_id'))
+        catalogue = {p['product_id']:p for p in client.market_catalog.products.find({}, {'_id':0})}
+        mongo_ids = set(catalogue)
     stock_ids = {row['product_id'] for row in connection.execute('SELECT DISTINCT product_id FROM inventory.stock')}
-    assert mongo_ids == set(actual_nodes) == stock_ids == {n['product_id'] for n in nodes}
+    assert mongo_ids == set(actual_nodes)
+    assert stock_ids == {n['product_id'] for n in nodes}
+    assert stock_ids <= mongo_ids  # New PIM products need not have Inventory stock yet.
     for node in nodes:
-        assert all(actual_nodes[node['product_id']].get(k)==v for k,v in node['properties'].items())
+        actual = actual_nodes[node['product_id']]
+        product = catalogue[node['product_id']]
+        if product['publication_version'] == 1:
+            assert all(actual.get(k)==v for k,v in node['properties'].items())
+        else:
+            assert actual['publication_version'] == product['publication_version']
+            assert actual['source_version'] == product['source_version']
+            assert json.loads(actual['technical_attributes_json']) == product['attributes']
     actual_edges = db.query('MATCH (a:Product)-[r:COMPATIBLE]->(b:Product) RETURN a.product_id AS a,b.product_id AS b,properties(r) AS props')
     assert len(actual_edges) == len(edges) == 163
     expected = {(e['from_id'],e['to_id'],e['rule'],e['relation_type']):e['properties'] for e in edges}
     for row in actual_edges:
         props = row['props']
-        assert all(props.get(k)==v for k,v in expected[(row['a'],row['b'],props['rule'],props['relation_type'])].items())
+        reference = expected[(row['a'],row['b'],props['rule'],props['relation_type'])]
+        keys = ['provenance','rule_version','source_version']
+        assert all(props.get(k)==reference[k] for k in keys)
+        if 'from_publication_version' in props:
+            from market_catalog.graph import valid_pair
+            valid = valid_pair(props['relation_type'], catalogue[row['a']], catalogue[row['b']])
+            assert (props['validation_status'] == 'RULE_VALIDATED') == valid
+        else:
+            assert props['validation_status'] == reference['validation_status']
     assert not db.query('MATCH (a)-[r:COMPATIBLE]->(b) WHERE NOT a:Product OR NOT b:Product OR a.product_id IS NULL OR b.product_id IS NULL RETURN r')
 
 

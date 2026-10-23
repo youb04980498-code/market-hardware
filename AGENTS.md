@@ -2,11 +2,11 @@
 
 ## Current state
 
-This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Application services, frontend, contracts, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
+This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Other application services, frontend, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
 
 Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
 
-The directory layout now follows the V3 scaffold. Frontend, AI services and Spark pipelines are placeholders; Kafka is optional under the kafka profile. The root Compose stack now includes Neo4j and the upstream UnoPim services, including its dedicated PostgreSQL database, Redis, Elasticsearch, workers and Mailpit. Ollama/Qwen, product synchronization, invoicing, notifications, log retention and quarterly processing remain to implement. Running infrastructure does not validate the application workflows.
+The directory layout now follows the V3 scaffold. Frontend, AI services and Spark pipelines are placeholders; Kafka is optional under the kafka profile. The root Compose stack now includes Neo4j and the upstream UnoPim services, including its dedicated PostgreSQL database, Redis, Elasticsearch, workers and Mailpit. Ollama/Qwen, invoicing, notifications, log retention and quarterly processing remain to implement. Running infrastructure does not validate the application workflows.
 
 ## Architecture conventions
 
@@ -45,9 +45,11 @@ Compose retains the `market-hardware` project name and named volumes from the or
 
 Run `scripts/initialize-data.ps1` to migrate, seed and validate the local databases; run `scripts/verify-data.ps1` for live database tests. The importer reads and adds generated service credentials directly in the ignored `.env`. See `docs/phase2-database-setup.md`.
 
+Run `scripts/start-catalog.ps1` for the catalog Compose profile and `scripts/verify-catalog.ps1` for unit and live Phase 2/3 regression tests. PIM approval binds content to its revision. After publication ownership transfers to the worker, seed fixtures cannot overwrite those projections. See `docs/phase3-catalogue.md`.
+
 ## Validation
 
-- For infrastructure edits, validate with `docker compose --env-file .env.example -f docker-compose.yml config --quiet`.
+- For infrastructure edits, validate with `docker compose --env-file .env -f docker-compose.yml config --quiet`.
 - For Python dependency edits, run `.\.venv\Scripts\python.exe -m pip check` and verify affected imports.
 - Run the relevant unit, contract, integration, E2E or recovery checks once the affected component exists. Do not add tests that only assert scaffold placeholders.
 - Never report that service uptime proves the business workflow, Spark integration, or recovery behavior. Verify those features explicitly when implemented.

@@ -76,3 +76,7 @@ implement APIs, validate real-world vendor specs, or execute actual Kafka/Spark/
 The validator also executes ai/v3_edge_cases.json: missing critical specifications, unknown or insufficient BIOS revisions, a supported synthetic firmware case, price increases/decreases requiring a new quote, budget overflow, and stock exhaustion before checkout. These checks are offline fixture validation, not a running checkout service or a production solver. Firmware revisions are ordered synthetic integers tied to a specific CPU/motherboard pair; they do not certify vendor BIOS support. A changed price requires customer reconfirmation; an unavailable product rejects checkout. No stock is reserved by this validation.
 
 The invoice lifecycle fixture emits invoice.ready, matching the V3 notification handoff.
+
+## Published catalogue ownership
+
+Phase 3 imports the PIM CSV through explicit UnoPim REST mappings and publishes approved revisions with product-sync. After adoption, Phase 2 imports preserve those revisions; source fixtures remain tracked and unchanged. See [Phase 3](../docs/phase3-catalogue.md).

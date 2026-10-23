@@ -10,7 +10,7 @@ Les sources de données synthétiques sont suivies dans Git sous `data/`. Les se
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
-La cible V3 comprend aussi Ollama/Qwen, la synchronisation produit, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Aucun service frontend, IA ou Spark n'est démarré à cette étape.
+La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Aucun service frontend, IA ou Spark n'est démarré à cette étape.
 
 Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
 
@@ -44,7 +44,7 @@ L'arrêt conserve les volumes. Le démarrage par défaut arrête un éventuel Ka
 
 ## Accès à l'infrastructure
 
-Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPim utilise sa propre base PostgreSQL, Redis, Elasticsearch, workers et Mailpit. La publication vers MongoDB/Neo4j reste à implémenter. Les identifiants administrateur générés sont conservés localement dans `.local/unopim-admin-credentials.txt` (ignoré par Git).
+Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPim utilise sa propre base PostgreSQL, Redis, Elasticsearch, workers et Mailpit. La publication approuvée vers MongoDB/Neo4j est implémentée dans la Phase 3. Les identifiants administrateur générés sont conservés localement dans `.local/unopim-admin-credentials.txt` (ignoré par Git).
 
 | Service | Adresse locale |
 | --- | --- |
@@ -84,7 +84,7 @@ Le scaffold suit les répertoires du §16 V3. Le fichier Compose racine reste le
 ## Vérifications du socle
 
 ```powershell
-docker compose --env-file .env.example -f docker-compose.yml config --quiet
+docker compose --env-file .env -f docker-compose.yml config --quiet
 docker compose -f docker-compose.yml ps
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
 .\.venv\Scripts\python.exe -m pip check
@@ -102,3 +102,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-data.ps1
 ```
 
 Voir [les mappings, contrôles et limites Phase 2](docs/phase2-database-setup.md).
+
+## Phase 3 : PIM et catalogue GraphQL
+
+UnoPim gère maintenant les huit familles de composants et leurs attributs. Le worker publie uniquement les révisions approuvées dans MongoDB et Neo4j, avec contrôle des versions, journal durable et reprise sur erreur. Le catalogue GraphQL Strawberry est disponible via Traefik à <http://localhost:8080/graphql>.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-catalog.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-catalog.ps1
+```
+
+[Configuration, mapping, approbation et limites Phase 3](docs/phase3-catalogue.md). Les tests conservent un produit de vérification inactif et avancent les versions de publication sans modifier les fixtures sources.

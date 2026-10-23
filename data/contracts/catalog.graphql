@@ -1,0 +1,61 @@
+enum Category {
+  CPU
+  MOTHERBOARD
+  RAM
+  GPU
+  SSD
+  PSU
+  CASE
+  COOLER
+  PERIPHERAL
+}
+
+type CompatibilityCandidate {
+  product: Product!
+  rule: String!
+  ruleVersion: String!
+  provenance: String!
+  validationStatus: String!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+type Product {
+  productId: ID!
+  sku: String!
+  name: String!
+  description: String!
+  brand: String!
+  category: Category!
+  priceCents: Int!
+  currency: String!
+  active: Boolean!
+  attributes: JSON!
+  sourceVersion: String!
+  sourceRevision: Int!
+  publicationVersion: Int!
+  publishedAt: String!
+  sourceSystem: String!
+  validationStatus: String!
+  technicalValidationVersion: String!
+}
+
+type ProductPage {
+  items: [Product!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+  hasNext: Boolean!
+}
+
+type Query {
+  products(category: Category = null, brand: String = null, minPriceCents: Int = null, maxPriceCents: Int = null, search: String = null, page: Int! = 1, pageSize: Int! = 20, includeInactive: Boolean! = false): ProductPage!
+  product(id: ID = null, productId: ID = null, includeInactive: Boolean! = false): Product
+  productBySku(sku: String!, includeInactive: Boolean! = false): Product
+  categories: [Category!]!
+  brands(category: Category = null): [String!]!
+  compatibleProducts(productId: ID!, category: Category = null): [CompatibilityCandidate!]!
+}

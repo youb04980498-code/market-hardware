@@ -200,6 +200,23 @@
       "technical_validation_version": {
         "bsonType": "string",
         "minLength": 1
+      },
+      "description": {
+        "bsonType": "string"
+      },
+      "source_revision": {
+        "bsonType": "long",
+        "minimum": 1
+      },
+      "publication_digest": {
+        "bsonType": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      },
+      "sync_state": {
+        "enum": [
+          "PENDING",
+          "READY"
+        ]
       }
     },
     "oneOf": [

@@ -1,0 +1,24 @@
+http:
+  routers:
+    catalogue:
+      rule: PathPrefix(`/graphql`)
+      entryPoints: [web]
+      service: catalogue
+      middlewares: [catalog-limit]
+    catalogue-health:
+      rule: Path(`/health/catalog`)
+      entryPoints: [web]
+      service: catalogue
+      middlewares: [health-path]
+  services:
+    catalogue:
+      loadBalancer:
+        servers:
+          - url: http://catalog-graphql:8080
+  middlewares:
+    catalog-limit:
+      buffering:
+        maxRequestBodyBytes: 65536
+    health-path:
+      replacePath:
+        path: /health

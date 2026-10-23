@@ -3,6 +3,81 @@ include:
   - path: ./infrastructure/unopim/compose.yaml
     env_file: ./infrastructure/unopim/.env
 services:
+  catalog-graphql:
+    profiles: [catalog]
+    image: market-hardware/catalog:phase3
+    build:
+      context: .
+      dockerfile: services/catalog-graphql/Dockerfile
+    environment:
+      MONGO_HOST: mongo
+      MONGO_CATALOG_READ_USER: ${MONGO_CATALOG_READ_USER}
+      MONGO_CATALOG_READ_PASSWORD: ${MONGO_CATALOG_READ_PASSWORD}
+      NEO4J_HTTP_URL: http://neo4j:7474
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=10)"]
+      interval: 15s
+      timeout: 12s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+  product-sync:
+    profiles: [catalog]
+    image: market-hardware/catalog:phase3
+    build:
+      context: .
+      dockerfile: services/catalog-graphql/Dockerfile
+    command: [python, -m, market_catalog.sync]
+    environment:
+      MONGO_HOST: mongo
+      MONGO_CATALOG_SYNC_USER: ${MONGO_CATALOG_SYNC_USER}
+      MONGO_CATALOG_SYNC_PASSWORD: ${MONGO_CATALOG_SYNC_PASSWORD}
+      UNOPIM_URL: http://unopim
+      UNOPIM_CLIENT_ID: ${UNOPIM_CLIENT_ID}
+      UNOPIM_CLIENT_SECRET: ${UNOPIM_CLIENT_SECRET}
+      UNOPIM_USERNAME: ${UNOPIM_USERNAME}
+      UNOPIM_PASSWORD: ${UNOPIM_PASSWORD}
+      NEO4J_HTTP_URL: http://neo4j:7474
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+    depends_on:
+      catalog-graphql:
+        condition: service_healthy
+      unopim:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "from market_catalog.config import mongo; from datetime import datetime, UTC; s=mongo().market_catalog.sync_status.find_one({'_id':'worker'}); assert s and (datetime.now(UTC)-s['checked_at']).total_seconds()<120 and s['failures']==0"]
+      interval: 30s
+      timeout: 12s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+  traefik:
+    profiles: [catalog]
+    image: traefik:v3.5.0
+    command:
+      - --entrypoints.web.address=:80
+      - --providers.file.filename=/etc/traefik/catalog.yml
+      - --ping=true
+      - --accesslog=true
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./infrastructure/traefik/catalog.yml:/etc/traefik/catalog.yml:ro
+    depends_on:
+      catalog-graphql:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, traefik, healthcheck, --ping]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
   neo4j:
     image: neo4j:5.26-community
     environment:

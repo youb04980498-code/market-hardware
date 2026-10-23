@@ -48,3 +48,7 @@ Validated source counts: 20 customers, 72 orders, 140 order items, 67 payments, 
 ## Scope and limitations
 
 The V3 requirements document remains unchanged. This phase does not implement frontend, AI, Kafka, Spark, application APIs, live UnoPim synchronization, PDF generation, email delivery or the scheduled log purge. Historical SENT notifications and invoice paths are fixture metadata; they do not prove delivery or PDF availability. All 80 source logs are retained. Compatibility and BIOS fixtures are synthetic and not externally vendor-certified. Product active-state and cross-service checks are exercised by import validation; future services must enforce them during requests. No source dataset generation or production password provisioning is claimed.
+
+## Phase 3 ownership handover
+
+After a projection is adopted by product-sync, rerunning this importer preserves its PIM-owned revision. Catalogue/graph regression checks permit later approved revisions and newly created PIM products without Inventory stock. The Phase 3 verification workflow retains one inactive test product and advances publication versions; the original source data remains unchanged. See [Phase 3](phase3-catalogue.md).
