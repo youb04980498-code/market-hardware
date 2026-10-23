@@ -2,9 +2,122 @@ name: market-hardware
 include:
   - path: ./infrastructure/unopim/compose.yaml
     env_file: ./infrastructure/unopim/.env
+x-commerce-env: &commerce-env
+  PG_HOST: postgres
+  JWT_SECRET: ${JWT_SECRET}
+  INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET}
+  COMMERCE_TESTING: ${COMMERCE_TESTING:-0}
+  AUTH_URL: http://auth:8080
+  ORDERS_URL: http://orders:8080
+  INVENTORY_URL: http://inventory:8080
+  PAYMENTS_URL: http://payments:8080
+x-commerce: &commerce
+  image: market-hardware/commerce:phase4
+  build:
+    context: .
+    dockerfile: infrastructure/compose/commerce.Dockerfile
+  profiles: [commerce]
+  restart: unless-stopped
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=10)"]
+    interval: 15s
+    timeout: 12s
+    retries: 5
+    start_period: 30s
 services:
+  auth:
+    <<: *commerce
+    command: [uvicorn, market_commerce.auth:app, --host, 0.0.0.0, --port, '8080']
+    environment:
+      <<: *commerce-env
+      PG_AUTH_PASSWORD: ${PG_AUTH_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+  inventory:
+    <<: *commerce
+    command: [uvicorn, market_commerce.inventory:app, --host, 0.0.0.0, --port, '8080']
+    environment:
+      <<: *commerce-env
+      PG_INVENTORY_PASSWORD: ${PG_INVENTORY_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+  payments:
+    <<: *commerce
+    command: [uvicorn, market_commerce.payments:app, --host, 0.0.0.0, --port, '8080']
+    environment:
+      <<: *commerce-env
+      PG_PAYMENTS_PASSWORD: ${PG_PAYMENTS_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+  orders:
+    <<: *commerce
+    command: [uvicorn, market_commerce.orders:app, --host, 0.0.0.0, --port, '8080']
+    environment:
+      <<: *commerce-env
+      PG_ORDERS_PASSWORD: ${PG_ORDERS_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+      inventory:
+        condition: service_healthy
+      payments:
+        condition: service_healthy
+      catalog-graphql:
+        condition: service_healthy
+  checkout-saga:
+    <<: *commerce
+    command: [python, -m, market_commerce.saga]
+    environment:
+      <<: *commerce-env
+      PG_ORDERS_PASSWORD: ${PG_ORDERS_PASSWORD}
+      COMMERCE_PROCESS: worker
+    depends_on:
+      orders:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "from pathlib import Path; import time; assert time.time()-float(Path('/tmp/saga-heartbeat').read_text())<90"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  outbox-publisher:
+    <<: *commerce
+    command: [python, -m, market_commerce.outbox]
+    environment:
+      PG_HOST: postgres
+      PG_OUTBOX_PASSWORD: ${PG_OUTBOX_PASSWORD}
+      KAFKA_ENABLED: ${KAFKA_ENABLED:-0}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:19092
+      COMMERCE_TESTING: ${COMMERCE_TESTING:-0}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          from market_commerce.common import connection;
+          from datetime import datetime,UTC;
+          c=connection('outbox');
+          s=c.execute("SELECT checked_at FROM monitoring.worker_status WHERE worker_name='outbox'").fetchone();
+          assert s and (datetime.now(UTC)-s['checked_at']).total_seconds()<90
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
   catalog-graphql:
-    profiles: [catalog]
+    profiles: [catalog, commerce]
     image: market-hardware/catalog:phase3
     build:
       context: .
@@ -58,7 +171,7 @@ services:
       start_period: 120s
     restart: unless-stopped
   traefik:
-    profiles: [catalog]
+    profiles: [catalog, commerce]
     image: traefik:v3.5.0
     command:
       - --entrypoints.web.address=:80
@@ -131,8 +244,14 @@ services:
     restart: unless-stopped
 
   kafka:
-    profiles: [kafka]
+    profiles: [kafka, streaming]
     image: apache/kafka:4.1.2
+    healthcheck:
+      test: [CMD-SHELL, '/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list >/dev/null 2>&1']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     ports:
       - "127.0.0.1:9092:9092"
     environment:

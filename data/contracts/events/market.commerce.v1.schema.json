@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Hardware commerce event envelope v1",
+  "type": "object",
+  "required": ["event_id", "event_type", "version", "aggregate_id", "aggregate_type", "occurred_at", "correlation_id", "causation_id", "idempotency_key", "source", "payload"],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "event_type": {"type": "string", "pattern": "^[a-z]+\\.[a-z_]+$"},
+    "version": {"const": 1},
+    "aggregate_id": {"type": "string", "minLength": 1},
+    "aggregate_type": {"type": "string", "minLength": 1},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "correlation_id": {"type": "string", "format": "uuid"},
+    "causation_id": {"type": ["string", "null"], "format": "uuid"},
+    "idempotency_key": {"type": ["string", "null"]},
+    "source": {"enum": ["auth", "orders", "inventory", "payments"]},
+    "payload": {"type": "object"}
+  },
+  "additionalProperties": false
+}

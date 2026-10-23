@@ -5,6 +5,9 @@ the seed CPU's technical attributes are restored by a newer approved revision.
 """
 import json
 import subprocess
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
 
 import httpx
 import pytest
@@ -43,6 +46,16 @@ def gql(query, errors=False):
 
 
 def container_sync():
+    # Fault injection records a real retry deadline; a warm Docker startup can
+    # finish before that deadline. Respect the worker's backoff rather than racing it.
+    with mongo() as client:
+        pending = list(client.market_catalog.sync_jobs.find({'state': 'ERROR'}, {'next_attempt_at': 1}))
+    for job in pending:
+        deadline = job.get('next_attempt_at')
+        if deadline:
+            delay = (deadline - datetime.now(UTC)).total_seconds()
+            if delay > 0:
+                time.sleep(min(delay + 0.05, 5))
     result = subprocess.run(['docker', 'compose', '--profile', 'catalog', 'run', '--rm', '--no-deps',
         'product-sync', 'python', '-m', 'market_catalog.sync', '--once'], cwd=ROOT,
         check=False, capture_output=True, text=True)
@@ -91,6 +104,18 @@ def test_graphql_filters_pagination_search_and_lookups():
     assert not {p['productId'] for p in first} & {p['productId'] for p in second}
     assert gql('{products(search:"Ryzen"){total}}')['data']['products']['total'] >= 1
     assert gql('{product(productId:"9223372036854775807"){sku}}')['data']['product'] is None
+
+
+def test_concurrent_queries_keep_requested_product_selections():
+    def fetch(index):
+        if index % 2:
+            data = gql('{products(pageSize:2){items{productId}}}')['data']
+            assert all(set(item) == {'productId'} for item in data['products']['items'])
+        else:
+            data = gql('{products(category:CPU,pageSize:2){items{productId category brand priceCents}} product(id:"1001"){sku}}')['data']
+            assert all({'productId','category','brand','priceCents'} <= set(item) for item in data['products']['items'])
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        list(pool.map(fetch, range(160)))
 
 
 @pytest.mark.parametrize('query', ['{products(pageSize:101){total}}', '{products(page:0){total}}',

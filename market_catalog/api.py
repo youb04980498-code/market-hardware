@@ -6,10 +6,12 @@ from enum import Enum
 import strawberry
 from fastapi import FastAPI, HTTPException
 from graphql import GraphQLError
+from graphql.execution.collect_fields import collect_subfields
 from starlette.concurrency import run_in_threadpool
 from strawberry.extensions import QueryDepthLimiter
 from strawberry.fastapi import GraphQLRouter
 from strawberry.scalars import JSON
+from strawberry.schema.schema import StrawberryGraphQLCoreExecutionContext
 
 from market_catalog import graph
 from market_catalog.config import mongo
@@ -206,7 +208,17 @@ class Query:
         return await run_in_threadpool(read, info, 'compatibility', identifier(product_id), category)
 
 
-schema = strawberry.Schema(query=Query, extensions=[QueryDepthLimiter(max_depth=8)])
+class CatalogueExecutionContext(StrawberryGraphQLCoreExecutionContext):
+    def collect_subfields(self, return_type, field_details_list):
+        # graphql-core 3.3.0 caches by temporary FieldDetails object IDs. Reused
+        # IDs can mix selections for Product occurrences in one async operation.
+        # Bounded catalogue pages can safely collect per occurrence without that cache.
+        return collect_subfields(self.schema, self.fragments, self.variable_values,
+                                 self.operation, return_type, field_details_list, self.hide_suggestions)
+
+
+schema = strawberry.Schema(query=Query, extensions=[lambda: QueryDepthLimiter(max_depth=8)],
+                           execution_context_class=CatalogueExecutionContext)
 
 
 @asynccontextmanager

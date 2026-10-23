@@ -34,7 +34,17 @@ def test_postgres_counts_and_schema_boundaries(connection):
                 'payments.payments':67, 'payments.invoices':61,
                 'payments.notification_deliveries':61, 'monitoring.application_logs':80}
     for table, count in expected.items():
-        assert connection.execute('SELECT count(*) AS n FROM '+table).fetchone()['n'] == count
+        assert connection.execute('SELECT count(*) AS n FROM '+table).fetchone()['n'] >= count
+    # Phase 4 adds retained, isolated commerce records; verify every historical source row itself.
+    mapping = {'auth.roles':'auth_roles','auth.users':'auth_users','auth.user_roles':'auth_user_roles',
+        'orders.customers':'customers','orders.orders':'orders','orders.order_items':'order_items',
+        'inventory.warehouses':'warehouses','inventory.stock':'stock','inventory.reservations':'reservations',
+        'payments.payments':'payments','payments.invoices':'invoices','payments.notification_deliveries':'notification_deliveries'}
+    for table, source in mapping.items():
+        for expected_row in db.sql_rows(source):
+            keys = db.KEYS[table]
+            actual = connection.execute('SELECT * FROM '+table+' WHERE '+' AND '.join(k+'=%s' for k in keys), [expected_row[k] for k in keys]).fetchone()
+            assert actual and all(db.canonical(actual[k]) == db.canonical(v) for k,v in expected_row.items())
     schemas = connection.execute("SELECT nspname FROM pg_namespace WHERE nspname NOT LIKE 'pg_%' AND nspname NOT IN ('public','information_schema')").fetchall()
     assert {row['nspname'] for row in schemas} == {'auth','orders','inventory','payments','monitoring'}
     assert not connection.execute('''SELECT 1 FROM pg_constraint c JOIN pg_class a ON a.oid=c.conrelid
@@ -215,7 +225,8 @@ def test_quarterly_financial_reference(connection):
         count(*) AS paid_orders,count(*) FILTER (WHERE p.status='REFUNDED') AS refunded_orders,
         count(DISTINCT o.customer_id) AS distinct_buyers
         FROM payments.payments p JOIN orders.orders o USING(order_id)
-        WHERE p.status IN ('SUCCEEDED','REFUNDED') GROUP BY 1,2 ORDER BY 1,2''').fetchall()
+        WHERE p.status IN ('SUCCEEDED','REFUNDED') AND p.payment_id=ANY(%s) GROUP BY 1,2 ORDER BY 1,2''',
+        ([p['payment_id'] for p in db.sql_rows('payments')],)).fetchall()
     expected = [{key:int(value) for key,value in row.items()}
                 for row in db.read_csv('lakehouse/quarterly_expected.csv')]
     assert actual == expected
@@ -227,7 +238,12 @@ def fingerprint():
         tables = connection.execute("SELECT table_schema,table_name FROM information_schema.tables WHERE table_schema IN ('auth','orders','inventory','payments','monitoring') AND table_type='BASE TABLE'").fetchall()
         for row in tables:
             name = row['table_schema']+'.'+row['table_name']
+            if name == 'monitoring.worker_status':
+                continue  # Live worker heartbeats are not seed-owned business state.
             values = [db.canonical(value) for value in connection.execute('SELECT * FROM '+name).fetchall()]
+            if name.endswith('.outbox_events'):
+                runtime = {'published_at','delivery_attempts','next_attempt_at','claim_owner','claim_until','last_error','kafka_partition','kafka_offset'}
+                values = [{k:v for k,v in value.items() if k not in runtime} for value in values]
             result[name] = sorted(values, key=lambda value:json.dumps(value,sort_keys=True))
     with db.mongo() as client:
         result['mongo'] = [db.canonical(value) for value in client.market_catalog.products.find({}, {'_id':0}).sort('product_id')]

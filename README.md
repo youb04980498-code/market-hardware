@@ -4,9 +4,9 @@ Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, ca
 
 ## État du dépôt
 
-Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est différé sous le profil optionnel `kafka` ; Prometheus et Grafana utilisent `monitoring`.
+Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est optionnel sous les profils `kafka`/`streaming` et publie les événements transactionnels quand il est activé ; Prometheus et Grafana utilisent `monitoring`.
 
-Les sources de données synthétiques sont suivies dans Git sous `data/`. Les services métier, le frontend, l'IA, les contrats applicatifs, les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
+Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM et le publisher outbox sont implémentés. Analytics, le frontend, l'IA et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
@@ -71,12 +71,12 @@ Le scaffold suit les répertoires du §16 V3. Le fichier Compose racine reste le
 | --- | --- |
 | `data/contracts/` | Contrats OpenAPI, GraphQL et événements Kafka |
 | `data/` | Fixtures, schémas PostgreSQL/MongoDB, contrats et emplacement seeds |
-| `services/` | Placeholders auth, orders, inventory, payments, catalog-graphql, analytics et ai-assistant |
-| `workers/` | Placeholders product-sync, outbox-publisher, invoice, notifications et log-retention |
+| `services/` | Auth, Orders, Inventory, Payments et Catalog GraphQL ; analytics et ai-assistant réservés |
+| `workers/` | Product-sync et outbox-publisher ; invoice, notifications et log-retention réservés |
 | `pipelines/` | Placeholders spark-streaming, spark-batch-quarterly, qualité et lakehouse |
 | `frontend/src/features/` | Overview, orders, catalog, logistics et observability |
 | `infrastructure/` | Traefik, Prometheus, Grafana, OpenTelemetry et build MinIO |
-| `tests/` | Placeholders unit, contracts, integration, e2e et acceptance |
+| `tests/` | Tests unitaires et intégration ; contrats, e2e et acceptance réservés |
 | `.github/workflows/` | Emplacement réservé aux futurs workflows |
 | `docs/` | Architecture, ADR, dictionnaire, API et validation de démonstration |
 | `scripts/` | Installation, démarrage, arrêt et vérification Windows |
@@ -113,3 +113,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-catalog.ps1
 ```
 
 [Configuration, mapping, approbation et limites Phase 3](docs/phase3-catalogue.md). Les tests conservent un produit de vérification inactif et avancent les versions de publication sans modifier les fixtures sources.
+
+## Phase 4 : backend transactionnel
+
+Auth, Inventory, Orders et Payments sont exposés via Traefik sous `/api/auth`, `/api/inventory`, `/api/orders` et `/api/payments`. Le checkout utilise une Saga persistée, les paiements sont simulés et le publisher confirme la publication des outboxes uniquement après acquittement Kafka. GraphQL et UnoPim restent opérationnels.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-commerce.ps1 -WithKafka
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-commerce.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-commerce.ps1
+```
+
+Sans `-WithKafka`, les événements restent durablement en attente. Les identifiants de développement sont générés directement dans `.env`, ignoré par Git ; les comptes fixtures restent désactivés. [Architecture, endpoints, sécurité, reprise et limites](docs/phase4-commerce.md).

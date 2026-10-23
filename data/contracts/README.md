@@ -9,3 +9,5 @@ Les contrats seront définis avant ou avec leurs implémentations conformément 
 Le §6 V3 impose également `POST /api/ai/builds`, et `GET /api/ai/builds/{build_id}` si les configurations sont persistées. Documenter `budget_cents`, usage, exigences et préférences, BOM, `total_cents`, `remaining_cents`, preuves de compatibilité, horodatage prix/stock, avertissements et alternatives. Prévoir le résultat `no_feasible_build` et la revalidation au checkout ; une proposition ne réserve pas de stock.
 
 L'enveloppe V3 comprend `event_id`, `event_type`, `version`, `aggregate_id`, `occurred_at`, `payload` et `correlation_id`. Documenter clés de partition, idempotence, retries bornés, dead-letter et lag. Les montants sont en centimes entiers, les dates en UTC et les références produit utilisent `product_id`.
+
+Phase 4 public REST contracts are exported under openapi/{auth,orders,inventory,payments}.v1.json. Internal service routes are deliberately omitted. The Kafka envelope is events/market.commerce.v1.schema.json; topics and at-least-once semantics are documented in docs/phase4-commerce.md.

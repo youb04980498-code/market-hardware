@@ -1,5 +1,25 @@
 http:
   routers:
+    payments:
+      rule: PathPrefix(`/api/payments`)
+      entryPoints: [web]
+      service: payments
+      middlewares: [catalog-limit]
+    orders:
+      rule: PathPrefix(`/api/orders`)
+      entryPoints: [web]
+      service: orders
+      middlewares: [catalog-limit]
+    inventory:
+      rule: PathPrefix(`/api/inventory`)
+      entryPoints: [web]
+      service: inventory
+      middlewares: [catalog-limit]
+    auth:
+      rule: PathPrefix(`/api/auth`)
+      entryPoints: [web]
+      service: auth
+      middlewares: [catalog-limit]
     catalogue:
       rule: PathPrefix(`/graphql`)
       entryPoints: [web]
@@ -11,6 +31,22 @@ http:
       service: catalogue
       middlewares: [health-path]
   services:
+    payments:
+      loadBalancer:
+        servers:
+          - url: http://payments:8080
+    orders:
+      loadBalancer:
+        servers:
+          - url: http://orders:8080
+    inventory:
+      loadBalancer:
+        servers:
+          - url: http://inventory:8080
+    auth:
+      loadBalancer:
+        servers:
+          - url: http://auth:8080
     catalogue:
       loadBalancer:
         servers:

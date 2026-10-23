@@ -2,7 +2,7 @@
 
 ## Current state
 
-This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Other application services, frontend, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
+This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Phase 4 implements Auth, Inventory, Orders, simulated Payments, persisted checkout Sagas and Kafka-acknowledged outbox publishing. Analytics, frontend, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
 
 Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
 
@@ -46,6 +46,8 @@ Compose retains the `market-hardware` project name and named volumes from the or
 Run `scripts/initialize-data.ps1` to migrate, seed and validate the local databases; run `scripts/verify-data.ps1` for live database tests. The importer reads and adds generated service credentials directly in the ignored `.env`. See `docs/phase2-database-setup.md`.
 
 Run `scripts/start-catalog.ps1` for the catalog Compose profile and `scripts/verify-catalog.ps1` for unit and live Phase 2/3 regression tests. PIM approval binds content to its revision. After publication ownership transfers to the worker, seed fixtures cannot overwrite those projections. See `docs/phase3-catalogue.md`.
+
+Run `scripts/start-commerce.ps1` (optionally `-WithKafka`), `scripts/verify-commerce.ps1` and `scripts/test-commerce.ps1` for Phase 4. Operator maps to API staff. PAID means captured payment plus committed inventory. Each service uses only its own schema role. Never hold SQL row locks across HTTP calls, accept customer simulation controls, or mark an event published before Kafka acknowledgement. See `docs/phase4-commerce.md`.
 
 ## Validation
 
