@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+# Preserve the imported reference document's Markdown hard line breaks.
+docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md whitespace=-blank-at-eol

@@ -1,0 +1,41 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Frontend and browser tests
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+
+# Local service and pipeline data
+.local/
+data/
+checkpoints/
+spark-warehouse/
+derby.log
+metastore_db/
+*.log
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini

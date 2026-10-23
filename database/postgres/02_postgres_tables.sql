@@ -1,0 +1,9 @@
+-- Scaffold: physical table definitions are not implemented yet.
+-- Reference: docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md, section 4.
+-- orders: customers, orders, order_items, outbox_events
+-- inventory: warehouses, stock, reservations
+-- payments: payments
+-- auth: users, roles, user_roles
+-- Keep foreign keys inside the owning schema; cross-service IDs are application references.
+-- Use integer cents for money and TIMESTAMPTZ for UTC timestamps.
+-- Implement constraints, indexes, restricted roles and migrations before loading data.
