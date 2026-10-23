@@ -1,0 +1,5 @@
+# Market Hardware storefront overrides
+
+The verified electronics/ecommerce search returns an E-commerce profile with a feature-rich showcase, Rubik/Nunito typography and energetic green/orange blocks. Adapt those recommendations to the requested restrained premium hardware aesthetic: forest #20583f action buttons with white text, ink #14221d, neutral #fbfcfa canvas, #eef3eb hero and sage #d8ecb0 accents. Use locally available Segoe UI/Arial/system sans without an external font request. Avoid urgency, social proof, reviews, glass blur, gratuitous motion and orange promo banners because the APIs provide no authority for them.
+
+Use one typographic hierarchy, 4/8px spacing rhythm, cards with fine borders and no hover-only purchase controls. Keep full product names, exact EUR prices, explicit generic-illustration semantics, keyboard focus, labelled native controls, responsive layouts and reduced-motion handling. Validate at 375/768/1024/1440 pixels and with real API data. Overrides also apply to the dashboard theme; dashboard density adapts to tables but uses the same tokens and controls.

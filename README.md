@@ -6,11 +6,23 @@ Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, ca
 
 Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est optionnel sous les profils `kafka`/`streaming` et publie les événements transactionnels quand il est activé ; Prometheus et Grafana utilisent `monitoring`.
 
-Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM et le publisher outbox sont implémentés. Analytics, le frontend, l'IA et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence ne signifie pas qu'une application est développée.
+Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM, le publisher outbox et l'application React boutique/administration sont implémentés. Analytics, l'IA et les pipelines restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence seule ne signifie pas qu'une application est développée.
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
-La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Aucun service frontend, IA ou Spark n'est démarré à cette étape.
+La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification, le batch trimestriel et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Le frontend dispose du profil Compose `frontend` ; aucun service IA ou Spark n'est démarré à cette étape.
+
+## Boutique et administration — Phase 5
+
+Après le démarrage du backend commerce, lancer :
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-frontend.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-frontend.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-frontend.ps1
+```
+
+La boutique est accessible sur http://localhost:8080/ et l'administration sur http://localhost:8080/admin. Utiliser les comptes DEV_CUSTOMER/DEV_ADMIN du fichier `.env` local ; ne jamais intégrer leurs valeurs au bundle frontend. Les jetons restent en mémoire : un rechargement nécessite une nouvelle connexion. Voir la [documentation Phase 5](docs/phase5-frontend.md) pour les sources MIT adaptées, les routes, contrats, tests et limitations.
 
 Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
 
@@ -74,7 +86,7 @@ Le scaffold suit les répertoires du §16 V3. Le fichier Compose racine reste le
 | `services/` | Auth, Orders, Inventory, Payments et Catalog GraphQL ; analytics et ai-assistant réservés |
 | `workers/` | Product-sync et outbox-publisher ; invoice, notifications et log-retention réservés |
 | `pipelines/` | Placeholders spark-streaming, spark-batch-quarterly, qualité et lakehouse |
-| `frontend/src/features/` | Overview, orders, catalog, logistics et observability |
+| `frontend/src/` | Une application React : storefront, admin, clients API et composants partagés ; anciens répertoires features conservés |
 | `infrastructure/` | Traefik, Prometheus, Grafana, OpenTelemetry et build MinIO |
 | `tests/` | Tests unitaires et intégration ; contrats, e2e et acceptance réservés |
 | `.github/workflows/` | Emplacement réservé aux futurs workflows |

@@ -2,16 +2,16 @@
 
 ## Current state
 
-This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Phase 4 implements Auth, Inventory, Orders, simulated Payments, persisted checkout Sagas and Kafka-acknowledged outbox publishing. Analytics, frontend, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
+This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Phase 4 implements Auth, Inventory, Orders, simulated Payments, persisted checkout Sagas and Kafka-acknowledged outbox publishing. Phase 5 adds one local React storefront and administration application. Analytics, pipelines and dataset generation remain to be implemented. Keep documentation explicit about that status.
 
 Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
 
-The directory layout now follows the V3 scaffold. Frontend, AI services and Spark pipelines are placeholders; Kafka is optional under the kafka profile. The root Compose stack now includes Neo4j and the upstream UnoPim services, including its dedicated PostgreSQL database, Redis, Elasticsearch, workers and Mailpit. Ollama/Qwen, invoicing, notifications, log retention and quarterly processing remain to implement. Running infrastructure does not validate the application workflows.
+The directory layout follows the V3 scaffold. AI services and Spark pipelines are placeholders; Kafka is optional under the kafka profile. The root Compose stack includes Neo4j and the upstream UnoPim services, including its dedicated PostgreSQL database, Redis, Elasticsearch, workers and Mailpit. Ollama/Qwen, invoicing, notifications, log retention and quarterly processing remain to implement. Running infrastructure does not validate the application workflows.
 
 ## Architecture conventions
 
 - Backend: Python 3.12, FastAPI, Pydantic, SQLAlchemy and Alembic; Strawberry GraphQL for the catalog.
-- Frontend: React, TypeScript, Vite, Tailwind CSS and Recharts, organized around the five feature directories.
+- Frontend: React, TypeScript, Vite and Tailwind CSS in one storefront/admin application. The five admin groups preserve operational views; Analytics/Observability are contextual pages. Recharts remains deferred until actual Analytics data exists. Preserve the original feature placeholder directories.
 - PostgreSQL uses one `market_db` database with exactly four business schemas: `orders`, `inventory`, `payments`, and `auth`. A technical `monitoring` schema is allowed for logs. Each service owns its schema and must use a distinct, restricted database role when implemented.
 - Do not add SQL foreign keys, joins, or direct database reads across service boundaries. Catalog data belongs in MongoDB `market_catalog.products`.
 - UnoPim owns product descriptions and attributes. A synchronization worker publishes approved, versioned products to MongoDB and validated compatibility relationships to Neo4j. The PIM database is separate from `market_db`; stock belongs to Inventory.
@@ -50,6 +50,8 @@ Run `scripts/start-catalog.ps1` for the catalog Compose profile and `scripts/ver
 Run `scripts/start-commerce.ps1` (optionally `-WithKafka`), `scripts/verify-commerce.ps1` and `scripts/test-commerce.ps1` for Phase 4. Operator maps to API staff. PAID means captured payment plus committed inventory. Each service uses only its own schema role. Never hold SQL row locks across HTTP calls, accept customer simulation controls, or mark an event published before Kafka acknowledgement. See `docs/phase4-commerce.md`.
 
 ## Validation
+
+Phase 5 runs one React application under frontend through Traefik. Run scripts/start-frontend.ps1 after commerce, then scripts/verify-frontend.ps1 and scripts/test-frontend.ps1. See docs/phase5-frontend.md and ADR 0004. Never embed DEV_* secrets in VITE_* variables. Tokens stay in memory; checkout identities persist in tab storage across uncertain network outcomes. Respect backend stock/pricing/payment authority. Run gateway restarts and live acceptance tests sequentially.
 
 - For infrastructure edits, validate with `docker compose --env-file .env -f docker-compose.yml config --quiet`.
 - For Python dependency edits, run `.\.venv\Scripts\python.exe -m pip check` and verify affected imports.

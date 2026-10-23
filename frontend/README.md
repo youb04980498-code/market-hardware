@@ -1,9 +1,5 @@
-# Frontend
+# Market Hardware storefront and administration
 
-Socle réservé à React, TypeScript, Vite, Tailwind CSS et Recharts. Le projet npm et les composants restent à initialiser.
+One React/TypeScript/Vite/Tailwind application. Run scripts/start-frontend.ps1 from the repository root after starting the existing commerce infrastructure. Open http://localhost:8080/ and /admin through Traefik. See docs/phase5-frontend.md for upstream provenance, licenses, contracts, security, tests and limitations.
 
-Le [cahier des charges V3](../docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md), §14, ajoute la boutique (catalogue, panier et checkout simulé), la synthèse trimestrielle et le module AI Assistant. Le catalogue public est consulté en GraphQL ; l'édition et l'approbation des produits passent par UnoPim. Ces fonctions restent à implémenter.
-
-Les cinq domaines sont `overview`, `orders`, `catalog`, `logistics` et `observability` dans `src/features/`. Les valeurs métier devront provenir des services réels via la gateway, avec gestion du chargement, des données absentes, des erreurs et des autorisations.
-
-Le module assistant V3 doit présenter la configuration PC sous budget : BOM complète, total et budget restant, preuves de compatibilité, informations inconnues, prix/stock horodatés et alternatives. Afficher explicitement l'absence de solution et les modifications de prix ou de stock au checkout.
+For optional development: npm ci --ignore-scripts, npm run dev from frontend. Vite binds only 127.0.0.1:5173 and proxies relative /api, /graphql and /health calls to the existing local gateway. Runtime secrets never enter the browser bundle. Auth is in memory and requires login after a full browser reload.
