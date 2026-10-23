@@ -43,12 +43,22 @@ if (-not (Test-Path '.env')) {
       'MONGO_ROOT_PASSWORD' = (EnvPassword)
       'MINIO_ROOT_PASSWORD' = (EnvPassword)
       'GRAFANA_ADMIN_PASSWORD' = (EnvPassword)
+      'NEO4J_PASSWORD' = (EnvPassword)
     }
     $template = Get-Content '.env.example' -Raw
     foreach($k in $values.Keys){ $template = $template.Replace("REPLACE_$k",$values[$k]) }
     [System.IO.File]::WriteAllText((Join-Path $root '.env'),$template,[System.Text.UTF8Encoding]::new($false))
     Write-Host 'Generated local secrets in .env (not committed).'
 } else { Write-Host 'Preserving existing .env.' }
+
+if (-not (Select-String -LiteralPath '.env' -Pattern '^NEO4J_PASSWORD=' -Quiet)) {
+    Add-Content -LiteralPath '.env' -Value ('NEO4J_PASSWORD=' + (EnvPassword))
+}
+$pimEnv = Join-Path $root 'infrastructure\unopim\.env'
+if (-not (Test-Path -LiteralPath $pimEnv)) {
+    $pimTemplate = [IO.File]::ReadAllText((Join-Path $root 'infrastructure\unopim\.env.example'))
+    [IO.File]::WriteAllText($pimEnv, $pimTemplate.Replace('REPLACE_UNOPIM_DB_PASSWORD', (EnvPassword)), [Text.UTF8Encoding]::new($false))
+}
 
 $python = $null
 if (HasCommand 'py') { & py -3.12 --version 2>$null; if($LASTEXITCODE -eq 0){$python = 'py'} }

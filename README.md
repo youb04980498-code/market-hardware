@@ -42,6 +42,8 @@ L'arrêt conserve les volumes. Les fichiers SQL et MongoDB sont des points de d�
 
 ## Accès à l'infrastructure
 
+Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPim utilise sa propre base PostgreSQL, Redis, Elasticsearch, workers et Mailpit. La publication vers MongoDB/Neo4j reste à implémenter. Les identifiants administrateur générés sont conservés localement dans `.local/unopim-admin-credentials.txt` (ignoré par Git).
+
 | Service | Adresse locale |
 | --- | --- |
 | PostgreSQL | `127.0.0.1:5432`, base `market_db` |
@@ -49,6 +51,9 @@ L'arrêt conserve les volumes. Les fichiers SQL et MongoDB sont des points de d�
 | Kafka, clients Windows | `127.0.0.1:9092` |
 | Kafka, autres conteneurs | `kafka:19092` |
 | Redis | `127.0.0.1:6379` |
+| Neo4j Browser / Bolt | <http://localhost:7474> / `127.0.0.1:7687` |
+| UnoPim | <http://localhost:8000/admin> |
+| Mailpit | <http://localhost:8025> |
 | MinIO S3 | <http://127.0.0.1:9000> |
 | Console MinIO | <http://127.0.0.1:9001> |
 | Prometheus, profil monitoring | <http://127.0.0.1:9090> |

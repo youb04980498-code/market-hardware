@@ -1,5 +1,20 @@
 name: market-hardware
+include:
+  - path: ./infrastructure/unopim/compose.yaml
+    env_file: ./infrastructure/unopim/.env
 services:
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    volumes:
+      - neo4jdata:/data
+    restart: unless-stopped
   postgres:
     image: postgres:16-alpine
     environment:
@@ -100,6 +115,8 @@ services:
     restart: unless-stopped
 
 volumes:
+  neo4jdata:
+    name: market-hardware_neo4jdata
   pgdata:
   mongodata:
   kafkadata:

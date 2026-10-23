@@ -6,7 +6,7 @@ This repository contains the project scaffold, the reference architecture, and w
 
 Read `docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md` before implementing a component. It is the governing functional and technical specification, including MUST requirements and acceptance criteria AC-01 through AC-27. `docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md` is historical V1 context; V3 takes precedence wherever they differ. Record material architecture decisions in `docs/ADR/` and update affected contracts and documentation with the implementation.
 
-The current layout and Compose stack are the V1 scaffold. Migrate toward the V3 target layout in section 16 as components are implemented. UnoPim, Neo4j, Ollama/Qwen, Mailpit, product synchronization, invoicing, notifications, log retention and quarterly processing remain requirements to implement.
+The directory layout remains the V1 scaffold. The root Compose stack now includes Neo4j and the upstream UnoPim services, including its dedicated PostgreSQL database, Redis, Elasticsearch, workers and Mailpit. Migrate toward the V3 layout as components are implemented. Ollama/Qwen, product synchronization, invoicing, notifications, log retention and quarterly processing remain to implement. Running infrastructure does not validate the application workflows.
 
 ## Architecture conventions
 
