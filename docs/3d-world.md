@@ -150,6 +150,8 @@ Execution results are recorded after final verification below. Local JUnit repor
 
 ### Executed on 2026-10-24
 
+The results below cover the original connected-city implementation. The later surrounding-city scenery update was built but **not regression-tested**, at the user's request. Its independent procedural geometry was inspired by [Gaurav-Gosain/city](https://github.com/Gaurav-Gosain/city); no upstream code/assets were copied because no reuse license was found in the inspected repository. Existing screenshots below predate that scenery update.
+
 - TypeScript, ESLint and production Vite build passed; all **40 frontend unit tests** passed.
 - **16 world backend checks** passed against running services, including unchanged business fingerprints, staff authorization, owned API comparisons, actual Kafka consumption and SSE resynchronization.
 - **One actual Kafka outage/recovery test** passed; the broker was restored and the existing bridge rejoined.

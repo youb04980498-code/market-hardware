@@ -1,4 +1,5 @@
 import type { WarehouseSite } from "./cityLayout";
+import CitySurroundings from "./CitySurroundings";
 import { useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -864,7 +865,7 @@ function CampusCamera({
     const target = new Vector3(...targets[focus.zone]);
     const zoom =
       focus.zone === "overview"
-        ? Math.min(size.width / 116, size.height / 86)
+        ? Math.min(size.width / 235, size.height / 175)
         : focus.zone === "warehouses"
           ? Math.min(size.width / 58, size.height / 45)
           : Math.min(size.width / 34, size.height / 27);
@@ -1135,6 +1136,7 @@ function Models({
       : selected;
   return (
     <>
+      <CitySurroundings />
       <CampusGround />
       <Districts />
       <Landscaping />
