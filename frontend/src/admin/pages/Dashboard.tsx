@@ -1,173 +1,251 @@
-import Today from "./Today";
-import { Alerts } from "./Observability";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useResource } from "../../hooks/useResource";
-import { orders, products } from "../../api/market";
+import { ArrowUpRight } from "lucide-react";
 import { request } from "../../api/client";
+import { labels } from "../../api/market";
+import { money } from "../../shared/utils";
+import { business, integer } from "../data";
+import { useAdminResource } from "../useAdminResource";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "../../shared/card";
-import { State } from "../../shared/State";
+  PageHeader,
+  Kpi,
+  Panel,
+  DateRange,
+  periodQuery,
+  Freshness,
+  Refresh,
+  ResourceState,
+  ShareList,
+  Badge,
+  type Range,
+} from "../components";
+import { OrdersChart } from "../charts";
+import Alerts from "../Alerts";
 export function Services() {
-  const health = useResource(
+  const health = useAdminResource(
     () =>
       Promise.all(
-        ["auth", "orders", "inventory", "payments"].map(async (s) => {
+        [
+          ["auth", "API Auth", "/api/auth/health"],
+          ["catalog", "Catalogue", "/health/catalog"],
+          ["orders", "Commandes", "/api/orders/health"],
+          ["payments", "Paiements", "/api/payments/health"],
+          ["inventory", "Inventaire", "/api/inventory/health"],
+          ["analytics", "Analytics", "/api/analytics/health"],
+        ].map(async ([id, name, path]) => {
           try {
-            await request("/api/" + s + "/health", {}, false);
-            return { name: s, up: true };
+            const r = await request<{ status: string }>(path, {}, false);
+            return {
+              id,
+              name,
+              status: r.status === "degraded" ? "Dégradé" : "Disponible",
+            };
           } catch {
-            return { name: s, up: false };
+            return { id, name, status: "Indisponible" };
           }
         }),
       ),
-    "health",
-    15000,
+    "executive-readiness",
+    30000,
   );
   return (
     <>
-      <State {...health} />
-      <div className="service-grid">
+      <ResourceState {...health} />
+      <div className="service-health-grid">
         {health.data?.map((s) => (
-          <div className="service" key={s.name}>
-            <span className={s.up ? "status-dot" : "status-dot down"} />
+          <div className="service-health service" key={s.id}>
             <strong>{s.name}</strong>
-            <span>{s.up ? "Disponible" : "Indisponible"}</span>
+            <Badge
+              value={s.status}
+              tone={
+                s.status === "Disponible"
+                  ? "good"
+                  : s.status === "Dégradé"
+                    ? "warn"
+                    : "bad"
+              }
+            />
+            <small>Readiness HTTP</small>
           </div>
         ))}
       </div>
-      <p className="small muted">
-        Readiness REST observée depuis ce navigateur ; ne mesure ni la latence
-        historique, ni le lag Kafka, ni Spark.
+      <p className="inline-note">
+        Readiness observée, indépendante des métriques de performance et de la
+        réconciliation financière.
       </p>
     </>
   );
 }
 export default function Dashboard() {
-  const counts = useResource(() => orders(1, true), "admin-count");
-  const catalog = useResource(() => products({ pageSize: 1 }), "catalog-count");
+  const [range, setRange] = useState<Range>(() => {
+    const from = new Date().toISOString().slice(0, 10);
+    return {
+      from,
+      to: new Date(Date.parse(from) + 86400000).toISOString().slice(0, 10),
+    };
+  });
+  const period = periodQuery(range);
+  const resource = useAdminResource(() => business(period), period);
+  const today = useAdminResource(
+    () =>
+      request<{
+        hourly: { hour: number; order_count: number }[];
+        metadata: { stale: boolean };
+      }>("/api/analytics/operations/today"),
+    "today-overview",
+  );
+  const d = resource.data;
+  const isToday =
+    range.from === new Date().toISOString().slice(0, 10) &&
+    range.to ===
+      new Date(Date.parse(range.from) + 86400000).toISOString().slice(0, 10);
+  const rows = isToday
+    ? today.data?.hourly.map((r) => ({
+        label: r.hour + " h",
+        count: r.order_count,
+      })) || []
+    : d?.daily.map((r) => ({ label: r.date, count: r.order_count })) || [];
   return (
-    <div className="admin-page">
-      <p className="eyebrow">PILOTAGE OPÉRATIONNEL</p>
-      <h1>Vue d'ensemble</h1>
-      <p className="muted">
-        Les opérations d'aujourd'hui. Des sources identifiées.
+    <div className="admin-page executive-page">
+      <PageHeader
+        tag="COMMAND CENTER / ACTIVITÉ"
+        title="Vue d’ensemble"
+        subtitle="Votre activité en un coup d’œil."
+      >
+        <DateRange value={range} onChange={setRange} />
+        <Refresh
+          loading={resource.loading}
+          onClick={() => {
+            resource.retry();
+            today.retry();
+          }}
+        />
+      </PageHeader>
+      <Freshness meta={d?.metadata} at={resource.at} error={resource.error} />
+      <ResourceState {...resource} />
+      <div className="kpi-strip">
+        <Kpi
+          label="Commandes"
+          value={d && integer(d.overview.order_count)}
+          note="Sur la période · toutes sources conservées"
+          href="/admin/orders"
+        />
+        <Kpi
+          label="Chiffre d’affaires net"
+          value={d && money(d.overview.net_cents)}
+          note="Captures moins remboursements connus"
+          href="/admin/analytics"
+        />
+        <Kpi
+          label="Panier moyen"
+          value={d && money(d.overview.aov_cents)}
+          note="Brut capturé par commande capturée"
+          href="/admin/analytics"
+        />
+        <Kpi
+          label="Clients acheteurs"
+          value={d && integer(d.overview.purchasing_customers)}
+          note="Acheteurs de la période · pas des sessions actives"
+          href="/admin/analytics?tab=customers"
+        />
+      </div>
+      <div className="command-grid">
+        <Panel
+          title="Évolution des commandes"
+          description={
+            isToday
+              ? "Aujourd’hui · regroupement horaire UTC"
+              : "Volume par jour · période sélectionnée"
+          }
+          action={
+            <Link to="/admin/orders">
+              Explorer les commandes <ArrowUpRight size={12} />
+            </Link>
+          }
+        >
+          {rows.length ? (
+            <OrdersChart rows={rows} hourly={isToday} />
+          ) : (
+            <ResourceState
+              empty={!resource.loading}
+              loading={resource.loading}
+            />
+          )}
+        </Panel>
+        <Panel
+          title="Répartition des ventes"
+          description="Part du CA net · catégorie publiée actuelle"
+        >
+          {d?.categories.length ? (
+            <ShareList
+              rows={d.categories
+                .slice()
+                .sort((a, b) => b.net_cents - a.net_cents)
+                .map((c) => ({
+                  label: labels[c.category] || c.category,
+                  value: c.net_cents,
+                }))}
+              format={money}
+            />
+          ) : (
+            <ResourceState empty={!resource.loading} />
+          )}
+          <p className="inline-note">
+            EUR · mêmes cohortes que le CA net. Comparaison précédente non
+            disponible dans cette synthèse.
+          </p>
+        </Panel>
+      </div>
+      <div className="command-grid equal">
+        <Alerts compact />
+        <Panel
+          title="État de la plateforme"
+          description="Six points de contrôle · actualisation 30 s"
+          action={
+            <Link to="/admin/observability">
+              Superviser <ArrowUpRight size={12} />
+            </Link>
+          }
+        >
+          <Services />
+        </Panel>
+      </div>
+      <div className="quick-links">
+        <span>Accès rapides</span>
+        {[
+          ["orders", "Commandes"],
+          ["inventory", "Inventaire"],
+          ["analytics", "Analytics"],
+          ["observability", "Observabilité"],
+        ].map(([path, name]) => (
+          <Link className="admin-button" to={"/admin/" + path} key={path}>
+            {name}
+            <ArrowUpRight size={12} />
+          </Link>
+        ))}
+      </div>
+      <p className="inline-note">
+        Périmètre local : données synthétiques historiques et activité de
+        vérification. Les métriques ne représentent pas des ventes réelles.
       </p>
-      <Today />
-      <div className="metrics">
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              Orders REST · toutes les données conservées
-            </CardDescription>
-            <CardTitle>Commandes enregistrées</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <State {...counts} />
-            <strong className="metric">{counts.data?.total ?? "—"}</strong>
-            <p className="small muted">
-              Inclut les fixtures et les commandes de vérification ; ne
-              représente pas des ventes réelles.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              Catalogue GraphQL · projection publiée
-            </CardDescription>
-            <CardTitle>Produits actifs</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <State {...catalog} />
-            <strong className="metric">{catalog.data?.total ?? "—"}</strong>
-            <p className="small muted">
-              Produits approuvés, accessibles à la boutique.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardDescription>
-              Analytics · projection matérialisée
-            </CardDescription>
-            <CardTitle>Chiffre d'affaires et tendances</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>
-              Captures, remboursements, cohortes UTC et fraîcheur de la
-              projection.
-            </p>
-            <Link to="/admin/analytics">Consulter les analyses</Link>
-          </CardContent>
-        </Card>
-      </div>
-      <section className="panel">
-        <h2>Disponibilité des services</h2>
-        <Services />
-      </section>
-      <Alerts />
-      <div className="builder-slots">
-        <section className="panel">
-          <h2>Suivre les commandes</h2>
-          <p>Statuts persistés, prix figés et progression du paiement.</p>
-          <Link to="/admin/orders">Voir les commandes →</Link>
-        </section>
-        <section className="panel">
-          <h2>Consulter le stock</h2>
-          <p>Quantités physiques, réservées et disponibles par entrepôt.</p>
-          <Link to="/admin/inventory">Voir l'inventaire →</Link>
-        </section>
-      </div>
     </div>
   );
 }
 export function Deferred({ kind }: { kind: "ai" | "observability" }) {
   return (
     <div className="admin-page">
-      <p className="eyebrow">INTÉGRATION TRANSPARENTE</p>
-      <h1>
-        {
-          {
-            ai: "AI PC Builder",
-            observability: "Observabilité",
-          }[kind]
-        }
-      </h1>
-      {kind === "observability" ? (
-        <>
-          <Services />
-          <section className="panel">
-            <h2>Supervision étendue</h2>
-            <p>
-              Les métriques Prometheus/Grafana, traces, rétention des logs et
-              lag des consommateurs ne sont pas exposés par une API frontend
-              approuvée.
-            </p>
-            <p>
-              Les outils locaux restent accessibles selon le profil monitoring
-              activé. Aucun statut Kafka ou Spark n'est déduit de la santé REST.
-            </p>
-          </section>
-        </>
-      ) : (
-        <section className="panel">
-          <span className="pill">PHASE 7 · À VENIR</span>
-          <h2>Service non disponible</h2>
-          <p>
-            Les diagnostics et configurations nécessitent le solveur
-            déterministe et l'API AI.
-          </p>
-          <p>
-            Aucune donnée de démonstration n'est utilisée pour remplacer cette
-            intégration.
-          </p>
-        </section>
-      )}
+      <PageHeader
+        title={kind === "ai" ? "AI PC Builder" : "Observabilité"}
+        subtitle="Cette intégration reste à venir."
+        tag="PHASE 7 · REPORTÉE"
+      />
+      <Panel title="Service non disponible">
+        <p>
+          Le solveur et l’API AI restent reportés. Aucune recommandation simulée
+          n’est présentée.
+        </p>
+        <Link to="/admin">Retour au pilotage</Link>
+      </Panel>
     </div>
   );
 }

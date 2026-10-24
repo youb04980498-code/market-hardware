@@ -1,0 +1,56 @@
+{
+  "browser_runs": [
+    {
+      "report": "admin-overhaul-smoke.xml",
+      "tests": 6,
+      "failures": 2,
+      "errors": 1,
+      "duration_seconds": 117.74021800000001
+    },
+    {
+      "report": "admin-overhaul-correction.xml",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 20.840016000000002
+    },
+    {
+      "report": "admin-pim-browser.xml",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "duration_seconds": 6.976
+    }
+  ],
+  "distinct_browser_scenarios": 6,
+  "latest_passed": 6,
+  "frontend_component_tests": {
+    "passed": 7,
+    "log": ".local/admin-unit.log",
+    "calendar_focused_retry": {
+      "passed": 1,
+      "deselected": 6,
+      "log": ".local/admin-calendar-correction.log"
+    }
+  },
+  "backend_focused_tests": {
+    "passed": 2,
+    "report": ".local/admin-backend-unit.xml"
+  },
+  "checks": [
+    "Production TypeScript/Vite build passed",
+    "Standalone TypeScript check passed",
+    "ESLint passed",
+    "Scoped Ruff passed",
+    "OpenAPI exports match",
+    "Local-secret candidate scan passed",
+    "27 source/requirement files unchanged",
+    "Real UnoPim REST enumeration matches staff status: 43 total, 42 active, 1 inactive, 0 pending, 0 errors; access 401/403/200 verified"
+  ],
+  "scope": "No full platform, recovery, backup or mobile suites. Existing browser scenarios retained with desktop inputs and updated selectors; not a claim that the complete legacy suite was rerun.",
+  "backend_pim_tests": {
+    "passed": 2,
+    "report": ".local/admin-pim-unit.xml"
+  },
+  "distinct_focused_checks": 17
+}

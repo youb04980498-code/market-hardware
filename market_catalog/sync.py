@@ -145,11 +145,15 @@ class Worker:
     def run_once(self):
         pim = UnoPim()
         failures = 0
+        author_total, managed_total, unapproved_total = 0, 0, 0
+        rejected_products = set()
         try:
             # Re-read PIM on every cycle; never publish an unapproved draft.
             for source in pim.products():
+                author_total += 1
                 if 'mh_product_id' not in source.get('values', {}).get('common', {}):
                     continue
+                managed_total += 1
                 pid = source['values']['common'].get('mh_product_id')
                 try:
                     document = approved(source)
@@ -158,9 +162,20 @@ class Worker:
                         if job and job.get('next_attempt_at') and job['next_attempt_at'] > datetime.now(UTC):
                             continue
                         self.publish(document)
+                    else:
+                        unapproved_total += 1
                 except Exception as exc:  # noqa: BLE001 -- durable worker records failure and continues
                     failures += 1
+                    rejected_products.add(str(pid))
                     self.error(pid, exc)
+            # Publish only a COMPLETE PIM enumeration. An interrupted scan must retain
+            # the prior observation, which the read API marks stale after 120 seconds.
+            # No extra PIM request, credentials or product mutation is introduced.
+            self.db.sync_status.update_one({'_id': 'authoring'}, {'$set': {
+                'observed_at': datetime.now(UTC), 'author_total': author_total,
+                'managed_total': managed_total, 'unapproved_total': unapproved_total,
+                'rejected_product_ids': sorted(rejected_products),
+            }}, upsert=True)
             # Previously approved durable snapshots can finish if the current PIM row is now a draft.
             pending = self.db.sync_jobs.find({'state': {'$in': ['PENDING', 'ERROR']},
                 '$or': [{'next_attempt_at': {'$lte': datetime.now(UTC)}}, {'next_attempt_at': {'$exists': False}}]})

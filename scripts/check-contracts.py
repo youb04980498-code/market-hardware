@@ -9,8 +9,9 @@ sys.path.insert(0, str(ROOT))
 
 def main(write=False):
     from market_analytics import api
+    from market_catalog import api as catalog
     from market_commerce import auth, inventory, orders, payments
-    for name, module in [('auth', auth), ('inventory', inventory), ('orders', orders), ('payments', payments), ('analytics', api)]:
+    for name, module in [('auth', auth), ('inventory', inventory), ('orders', orders), ('payments', payments), ('analytics', api), ('catalog-operations', catalog)]:
         path = ROOT / 'data/contracts/openapi' / (name + '.v1.json')
         generated = module.app.openapi()
         if write:

@@ -223,30 +223,38 @@ test("customer auth, live inventory and forbidden admin area", async ({
   });
   expect(response.status()).toBe(403);
 });
-test("admin accesses all five groups, real orders, catalog and warehouses", async ({
+test("admin accesses all six groups, real orders, catalog and warehouses", async ({
   page,
 }) => {
   await login(page, "ADMIN", "/admin");
   await expect(
     page.getByRole("navigation", { name: "Administration" }).getByRole("link"),
-  ).toHaveCount(5);
-  await expect(
-    page.getByText("Produits actifs", { exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(6);
+  await page
+    .getByRole("navigation", { name: "Administration" })
+    .getByRole("link", { name: "Catalogue", exact: true })
+    .click();
   await expect(
     page
-      .locator('[data-slot="card"]')
-      .filter({ has: page.getByText("Produits actifs", { exact: true }) })
+      .locator(".kpi-card")
+      .filter({ hasText: "Produits publi\u00e9s" })
       .locator(".metric"),
   ).toHaveText("42");
-  await page.getByRole("link", { name: "Commandes", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Administration" })
+    .getByRole("link", { name: "Commandes", exact: true })
+    .click();
   await expect(
     page.getByRole("columnheader", { name: "Commande", exact: true }),
   ).toBeVisible();
   await expect(page.locator("tbody tr").first()).toBeVisible();
   await page.getByRole("link", { name: "Catalogue", exact: true }).click();
-  await expect(page.locator("tbody tr")).toHaveCount(20);
+  await expect(page.locator("tbody tr")).toHaveCount(10);
   await page.getByRole("link", { name: "Inventaire", exact: true }).click();
+  await page
+    .getByRole("group", { name: "Vues" })
+    .getByRole("button", { name: "Stocks", exact: true })
+    .click();
   await expect(
     page.getByRole("columnheader", { name: "Réservé", exact: true }),
   ).toBeVisible();
@@ -332,10 +340,10 @@ test("admin session survives reload, logout clears it and deep links preserve th
   await page.reload();
   await expect(page).toHaveURL(/\/admin$/);
   await expect(
-    page.getByRole("heading", { name: "Vue d'ensemble", exact: true }),
+    page.getByRole("heading", { name: "Vue d\u2019ensemble", exact: true }),
   ).toBeVisible();
   await page
-    .getByRole("link", { name: "Retour boutique", exact: true })
+    .getByRole("link", { name: "Ouvrir la boutique", exact: true })
     .click();
   await page.getByRole("button", { name: "Déconnexion", exact: true }).click();
   await expect(page).toHaveURL(/login/);
@@ -352,7 +360,7 @@ test("analytics uses materialized data and future integrations remain explicit",
 }) => {
   await login(page, "ADMIN", "/admin/analytics");
   await expect(
-    page.getByRole("heading", { name: "Pipeline et rapprochement" }),
+    page.getByRole("heading", { name: "Fiabilit\u00e9 des donn\u00e9es" }),
   ).toBeVisible();
   await page.getByRole("link", { name: "AI PC Builder", exact: true }).click();
   await expect(
@@ -360,10 +368,10 @@ test("analytics uses materialized data and future integrations remain explicit",
   ).toBeVisible();
   await page.getByRole("link", { name: "Observabilité", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Outils de supervision" }),
+    page.getByRole("heading", { name: "Architecture de la plateforme" }),
   ).toBeVisible();
 });
-for (const width of [375, 768, 1024, 1440])
+for (const width of [1280, 1440, 1920, 3440])
   test(`responsive storefront and admin screenshots ${width}`, async ({
     page,
   }) => {
@@ -386,9 +394,23 @@ for (const width of [375, 768, 1024, 1440])
       ),
     ).toBe(true);
     await login(page, "ADMIN", "/admin");
-    await expect(page.locator('[data-slot="card"]').filter({ has: page.getByText("Produits actifs", { exact: true }) }).locator(".metric")).toHaveText("42");
-    await expect(page.locator(".metric").first()).toHaveText(/^\d+$/);
-    await expect(page.locator("section").filter({ has: page.getByRole("heading", {name: "Disponibilité des services", exact: true}) }).locator(".service-grid .service")).toHaveCount(4);
+    await expect(
+      page.locator(".kpi-card").first().locator(".metric"),
+    ).toHaveText(/^[0-9\s\u202f]+$/);
+    await expect(page.locator(".metric").first()).toHaveText(
+      /^[0-9\s\u202f]+$/,
+    );
+    await expect(
+      page
+        .locator("section")
+        .filter({
+          has: page.getByRole("heading", {
+            name: "État de la plateforme",
+            exact: true,
+          }),
+        })
+        .locator(".service-health-grid .service"),
+    ).toHaveCount(6);
     await page.screenshot({
       path: resolve("..", ".local", "screenshots", `admin-${width}.png`),
       fullPage: true,
@@ -453,7 +475,9 @@ test("accessible storefront and admin have no serious or critical axe violations
     ),
   ).toEqual([]);
   await login(page, "ADMIN", "/admin");
-  await expect(page.locator('[data-slot="card"]').filter({ has: page.getByText("Produits actifs", { exact: true }) }).locator(".metric")).toHaveText("42");
+  await expect(page.locator(".kpi-card").first().locator(".metric")).toHaveText(
+    /^[0-9\s\u202f]+$/,
+  );
   const admin = await new AxeBuilder({ page }).analyze();
   expect(
     admin.violations.filter((v) =>

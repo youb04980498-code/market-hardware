@@ -1,0 +1,24 @@
+{
+  "direct_unopim_total": 43,
+  "status": {
+    "author_total": 43,
+    "managed_total": 43,
+    "unapproved_total": 0,
+    "published_active": 42,
+    "published_inactive": 1,
+    "pending_jobs": 0,
+    "publication_errors": 0,
+    "pim_observed_at": "2026-10-24T09:13:27.065000+00:00",
+    "observed_at": "2026-10-24T09:13:39.128380+00:00",
+    "pim_connected": true,
+    "worker_healthy": true,
+    "stale": false,
+    "source": "UnoPim REST enumeration by product-sync; persisted jobs in MongoDB",
+    "definitions": {
+      "author_total": "All authoring products, including inactive/unmanaged products.",
+      "pending_jobs": "Persisted PENDING jobs. Unapproved drafts are counted separately.",
+      "publication_errors": "Distinct products rejected in the latest complete scan or in a current ERROR job; historical errors are excluded."
+    }
+  },
+  "access_checks": "unauthenticated 401, customer 403, staff 200"
+}

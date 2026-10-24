@@ -14,19 +14,17 @@ async function admin(page: Page, path: string) {
     .fill(env.DEV_ADMIN_PASSWORD);
   await page.getByRole("button", { name: "Se connecter", exact: true }).click();
 }
-for (const width of [375, 1440]) {
+for (const width of [1280, 1440]) {
   test(`operations pages responsive accessible ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
     await admin(page, "/admin/observability");
     await expect(
-      page.getByRole("heading", { name: "Outils de supervision" }),
+      page.getByRole("heading", { name: "Architecture de la plateforme" }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Alertes métier" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Ouvrir grafana" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Grafana" })).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -52,14 +50,22 @@ for (const width of [375, 1440]) {
     await expect(
       page.getByRole("heading", { name: "Capacité des entrepôts" }),
     ).toBeVisible();
-    await page.getByLabel("Inclure les entrepôts de test et archivés").check();
-    await expect(
-      page.locator(".ops-card").filter({ hasText: "TEST" }).first(),
-    ).toBeVisible();
+    await page
+      .getByRole("group", { name: "Vues" })
+      .getByRole("button", { name: "Stocks", exact: true })
+      .click();
     await expect(page.locator("tbody")).not.toContainText(
       "Phase5 browser verification",
     );
-    await page.getByLabel("Inclure les stocks de test et archivés").check();
+    await page
+      .getByLabel("Inclure les entrep\u00f4ts de test et archiv\u00e9s")
+      .check();
+    await expect(
+      page.locator(".warehouse-card").filter({ hasText: "TEST" }).first(),
+    ).toBeVisible();
+    await page
+      .getByPlaceholder("Nom, SKU ou identifiant")
+      .fill("Phase5 browser verification");
     await expect(page.locator("tbody")).toContainText(
       "Phase5 browser verification",
     );
@@ -77,7 +83,7 @@ for (const width of [375, 1440]) {
     ).toEqual([]);
     await page.goto("/admin");
     await expect(
-      page.getByRole("heading", { name: "Commandes du jour" }),
+      page.getByRole("heading", { name: "Évolution des commandes" }),
     ).toBeVisible();
   });
 }
@@ -86,7 +92,7 @@ test("alert acknowledgement and history use persistent API", async ({
 }) => {
   await admin(page, "/admin/observability");
   await expect(
-    page.getByRole("heading", { name: "Outils de supervision" }),
+    page.getByRole("heading", { name: "Architecture de la plateforme" }),
   ).toBeVisible();
   const incident = page
     .locator(".ops-card")
@@ -117,7 +123,7 @@ test("alert acknowledgement and history use persistent API", async ({
   await expect(retained).toContainText("Résolue");
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Outils de supervision" }),
+    page.getByRole("heading", { name: "Architecture de la plateforme" }),
   ).toBeVisible();
   await page.getByLabel("État", { exact: true }).selectOption("RESOLVED");
   await expect(retained).toContainText("Résolue");

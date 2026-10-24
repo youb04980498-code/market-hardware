@@ -882,6 +882,71 @@
           }
         ]
       }
+    },
+    "/api/analytics/observability/history": {
+      "get": {
+        "summary": "Metric History",
+        "operationId": "metric_history_api_analytics_observability_history_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/analytics/observability/traces": {
+      "get": {
+        "summary": "Recent Traces",
+        "operationId": "recent_traces_api_analytics_observability_traces_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "service",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(auth|orders|inventory|payments|catalog|analytics)$",
+              "default": "orders",
+              "title": "Service"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

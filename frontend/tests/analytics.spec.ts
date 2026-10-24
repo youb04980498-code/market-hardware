@@ -17,28 +17,31 @@ async function login(page: Page, who = "ADMIN") {
 test("real analytics values, filters and empty period", async ({ page }) => {
   await login(page);
   await expect(
-    page.getByRole("heading", { name: "Pipeline et rapprochement" }),
+    page.getByRole("heading", { name: "Fiabilité des données" }),
   ).toBeVisible();
-  await expect(page.locator(".analytics-metrics .metric")).toHaveCount(12);
-  await expect(
-    page.locator(".analytics-metrics .metric").first(),
-  ).toContainText("€");
+  await expect(page.locator(".kpi-strip .metric")).toHaveCount(4);
+  await expect(page.locator(".kpi-strip .metric").first()).toContainText("€");
   await page.getByLabel("Trimestre", { exact: true }).selectOption("2025-Q1");
-  await expect(page.getByLabel("Du", { exact: true })).toHaveValue(
-    "2025-01-01",
-  );
-  await expect(page.getByLabel("Au (exclu)")).toHaveValue("2025-04-01");
+  await expect(page.locator(".range-control")).toContainText("2025-01-01");
+  await expect(page.locator(".range-control")).toContainText("2025-04-01");
   await expect(
-    page.getByRole("heading", { name: "Pipeline et rapprochement" }),
+    page.getByRole("heading", { name: "Fiabilité des données" }),
   ).toBeVisible();
-  await page.getByLabel("Du", { exact: true }).fill("2099-01-01");
-  await page.getByLabel("Au (exclu)").fill("2099-02-01");
-  await expect(page.locator(".analytics-metrics .metric").first()).toHaveText(
-    /0,00/,
-  );
+  await page.locator(".range-control button").first().click();
+  await page.getByLabel("Année du calendrier").selectOption("2099");
+  await page.getByLabel("Mois du calendrier").selectOption("01");
+  await page.getByRole("button", { name: "2099-01-01", exact: true }).click();
+  await page.getByRole("button", { name: "2099-01-02", exact: true }).click();
+  await page.getByRole("button", { name: "Appliquer la période" }).click();
+  await expect(page.locator(".kpi-strip .metric").first()).toHaveText(/0,00/);
   await expect(
-    page.getByRole("heading", { name: "Aucun résultat" }).first(),
+    page.getByText("Aucun résultat", { exact: true }).first(),
   ).toBeVisible();
+  await page.getByLabel("Trimestre", { exact: true }).selectOption("2025-Q1");
+  await page
+    .getByRole("group", { name: "Navigation Analytics" })
+    .getByRole("button", { name: "Produits", exact: true })
+    .click();
   await page.getByLabel("Catégorie", { exact: true }).selectOption("GPU");
   await expect(page.getByLabel("Catégorie", { exact: true })).toHaveValue(
     "GPU",
@@ -61,9 +64,16 @@ test("analytics loading and API errors never manufacture values", async ({
     });
   });
   await login(page);
-  await expect(page.getByRole("status")).toContainText("Chargement");
+  await expect(
+    page.getByRole("status", { name: "Chargement des données" }).first(),
+  ).toBeVisible();
   await expect(page.getByRole("alert")).toBeVisible();
-  await expect(page.locator(".analytics-metrics")).toHaveCount(0);
+  await expect(page.locator(".kpi-strip .metric")).toHaveText([
+    "—",
+    "—",
+    "—",
+    "—",
+  ]);
 });
 test("stale metadata is prominently visible", async ({ page }) => {
   await page.route("**/api/analytics/**", async (route) => {
@@ -74,22 +84,20 @@ test("stale metadata is prominently visible", async ({ page }) => {
     await route.fulfill({ response, json: body });
   });
   await login(page);
-  await expect(
-    page.getByText("Données périmées ou vérification interrompue"),
-  ).toBeVisible();
+  await expect(page.getByText(/Projection ancienne/).first()).toBeVisible();
 });
 test("customer cannot open analytics", async ({ page }) => {
   await login(page, "CUSTOMER");
   await expect(page.getByText(/Accès refusé|Accès réservé/)).toBeVisible();
-  await expect(page.locator(".analytics-metrics")).toHaveCount(0);
+  await expect(page.locator(".kpi-strip")).toHaveCount(0);
 });
-for (const width of [375, 768, 1024, 1440])
+for (const width of [1280, 1440, 1920, 3440])
   test("analytics responsive and accessible " + width, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await login(page);
     await expect(
-      page.getByRole("heading", { name: "Pipeline et rapprochement" }),
+      page.getByRole("heading", { name: "Fiabilité des données" }),
     ).toBeVisible();
     expect(
       await page.evaluate(

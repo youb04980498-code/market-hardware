@@ -1,5 +1,9 @@
 # Working in Market Hardware
 
+## Administration design
+
+For dashboard work, read the project-local [dashboard-design skill](.agents/skills/dashboard-design/SKILL.md) and its layout, components, tokens, snippets and QA references. Installed from abdiraimov-otabek/dashboard-design-skill (MIT). The administration overhaul is desktop-only (1280px and above), light content with navy navigation and restrained blue accents; these user requirements override generic mobile/dark-mode examples. Never seed data for visual QA: compare real API responses with rendered values. Keep storefront styling isolated. See docs/admin-overhaul.md for API boundaries and verification.
+
 ## Current state
 
 This repository contains the project scaffold, the reference architecture, and working local infrastructure. Phase 2 implements versioned database migrations, catalog validation, graph imports, idempotent seed loading and live database integration tests. Phase 3 implements UnoPim REST configuration/import/approval, the product synchronization worker, a read-only Strawberry GraphQL catalogue and Traefik routing. Phase 4 implements Auth, Inventory, Orders, simulated Payments, persisted checkout Sagas and Kafka-acknowledged outbox publishing. Phase 5 adds one local React storefront and administration application. Phase 6 adds local Spark/Delta streaming, historical snapshot reconciliation, quarterly reports, a read-only Analytics API and the existing React analytics page. Dataset generation and AI remain to implement. Keep documentation explicit about that status.

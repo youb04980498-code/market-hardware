@@ -74,6 +74,10 @@ def register(app, staff):
             'request_rate': 'sum by(service)(rate(market_http_requests_total[5m]))',
             'error_rate': 'sum by(service)(rate(market_http_requests_total{status=~"5.."}[5m]))',
             'p95_seconds': 'histogram_quantile(0.95,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'p50_seconds': 'histogram_quantile(0.50,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'p99_seconds': 'histogram_quantile(0.99,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'process_cpu': 'rate(process_cpu_seconds_total{job="commerce"}[5m])',
+            'process_memory_bytes': 'process_resident_memory_bytes{job="commerce"}',
             'kafka_lag': 'market_kafka_lag', 'freshness_seconds': 'market_analytics_freshness_seconds',
             'spark_input_rate': 'market_spark_input_rows_per_second',
         }
@@ -94,6 +98,56 @@ def register(app, staff):
             except (httpx.HTTPError, ValueError):
                 result['infrastructure_alerts'] = None
                 errors.append('infrastructure_alerts')
-        return {'infrastructure_alerts': result.pop('infrastructure_alerts', None), 'metrics': result, 'unavailable': errors, 'links': {
+        from datetime import UTC, datetime
+        return {'observed_at': datetime.now(UTC).isoformat(), 'infrastructure_alerts': result.pop('infrastructure_alerts', None), 'metrics': result, 'unavailable': errors, 'links': {
             'grafana': 'http://localhost:3000', 'tracing': 'http://localhost:16686',
             'prometheus': 'http://localhost:9090'}}
+
+    @app.get('/api/analytics/observability/history')
+    def metric_history(user=user_dep):
+        # Bounded fixed queries: the browser cannot submit PromQL, URLs or arbitrary time spans.
+        from datetime import UTC, datetime
+        end = int(datetime.now(UTC).timestamp())
+        queries = {
+            'p50': 'histogram_quantile(0.5,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'p95': 'histogram_quantile(0.95,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'p99': 'histogram_quantile(0.99,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))',
+            'traffic': 'sum by(service)(rate(market_http_requests_total[5m]))',
+            'errors': 'sum by(service)(rate(market_http_requests_total{status=~"5.."}[5m]))',
+        }
+        result, unavailable = {}, []
+        with httpx.Client(timeout=3, trust_env=False) as client:
+            for key, query in queries.items():
+                try:
+                    response = client.get(env().get('PROMETHEUS_URL', 'http://prometheus:9090') + '/api/v1/query_range',
+                        params={'query': query, 'start': end - 1800, 'end': end, 'step': 60})
+                    response.raise_for_status()
+                    result[key] = response.json()['data']['result']
+                except (httpx.HTTPError, ValueError, KeyError):
+                    result[key] = None
+                    unavailable.append(key)
+        return {'observed_at': datetime.now(UTC).isoformat(), 'window_seconds': 1800,
+            'step_seconds': 60, 'series': result, 'unavailable': unavailable}
+
+    @app.get('/api/analytics/observability/traces')
+    def recent_traces(service: str = Query('orders', pattern='^(auth|orders|inventory|payments|catalog|analytics)$'), user=user_dep):
+        # Only a safe summary. No headers, span attributes, logs or customer data leave the server.
+        try:
+            with httpx.Client(timeout=3, trust_env=False) as client:
+                response = client.get(env().get('JAEGER_QUERY_URL', 'http://jaeger:16686') + '/api/traces',
+                    params={'service': service, 'limit': 10, 'lookback': '1h'})
+                response.raise_for_status()
+                traces = [trace_summary(t, service) for t in response.json()['data'][:10]]
+            return {'items': traces, 'unavailable': False}
+        except (httpx.HTTPError, ValueError, KeyError, TypeError):
+            return {'items': [], 'unavailable': True}
+
+
+def trace_summary(trace, service):
+    spans = trace.get('spans', [])
+    processes = trace.get('processes', {})
+    own = [s for s in spans if processes.get(s.get('processID'), {}).get('serviceName') == service]
+    root = min(own or spans, key=lambda s: s.get('startTime', 0), default={})
+    return {'trace_id': trace['traceID'], 'service': service, 'operation': root.get('operationName', 'Unknown'),
+        'duration_ms': root.get('duration', 0) / 1000, 'started_at_us': root.get('startTime'),
+        'error': any(t.get('key') == 'error' and t.get('value') is True for s in spans for t in s.get('tags', []))}

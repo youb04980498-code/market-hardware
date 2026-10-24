@@ -231,6 +231,10 @@ async def lifespan(application):
 
 app = FastAPI(title='Market Hardware Catalogue', lifespan=lifespan)
 
+from market_catalog.operations import register as register_operations
+
+register_operations(app)
+
 
 async def context():
     return {'catalogue': app.state.catalogue}

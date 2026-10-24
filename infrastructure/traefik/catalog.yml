@@ -35,6 +35,11 @@ http:
       entryPoints: [web]
       service: catalogue
       middlewares: [catalog-limit, gateway-rate]
+    catalogue-operations:
+      rule: PathPrefix(`/api/catalog`)
+      entryPoints: [web]
+      service: catalogue
+      middlewares: [catalog-limit, gateway-rate]
     catalogue-health:
       rule: Path(`/health/catalog`)
       entryPoints: [web]
