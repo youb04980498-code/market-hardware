@@ -1,3 +1,5 @@
+import Today from "./Today";
+import { Alerts } from "./Observability";
 import { Link } from "react-router-dom";
 import { useResource } from "../../hooks/useResource";
 import { orders, products } from "../../api/market";
@@ -55,6 +57,7 @@ export default function Dashboard() {
       <p className="muted">
         Les opérations d'aujourd'hui. Des sources identifiées.
       </p>
+      <Today />
       <div className="metrics">
         <Card>
           <CardHeader>
@@ -107,6 +110,7 @@ export default function Dashboard() {
         <h2>Disponibilité des services</h2>
         <Services />
       </section>
+      <Alerts />
       <div className="builder-slots">
         <section className="panel">
           <h2>Suivre les commandes</h2>

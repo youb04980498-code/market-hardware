@@ -167,15 +167,20 @@
       "post": {
         "summary": "Create Warehouse",
         "operationId": "create_warehouse_api_inventory_warehouses_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/Warehouse"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
@@ -196,12 +201,48 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "summary": "Warehouse Summary",
+        "operationId": "warehouse_summary_api_inventory_warehouses_get",
         "security": [
           {
             "HTTPBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "include_test",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Test"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/inventory/adjustments": {
@@ -582,6 +623,12 @@
             "maximum": 10000000.0,
             "minimum": 0.0,
             "title": "Capacity Units"
+          },
+          "classification": {
+            "type": "string",
+            "pattern": "^(OPERATIONAL|TEST|ARCHIVED)$",
+            "title": "Classification",
+            "default": "OPERATIONAL"
           }
         },
         "additionalProperties": false,

@@ -10,7 +10,7 @@ Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, 
 
 La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
 
-La cible V3 comprend aussi Ollama/Qwen, les workers métier de facturation/notification et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ces flux applicatifs restent à implémenter. Le frontend dispose du profil Compose `frontend` ; Spark utilise le profil optionnel analytics ; aucun service IA n'est démarré.
+La Phase 8 ajoute la supervision, les traces distribuées, les alertes persistantes, les capacités des entrepôts et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ollama/Qwen et les workers métier de facturation/notification restent à implémenter ; la Phase 7 est reportée. Le frontend dispose du profil Compose `frontend` ; Spark utilise le profil optionnel analytics ; aucun service IA n'est démarré.
 
 ## Boutique et administration — Phase 5
 
@@ -141,3 +141,16 @@ Sans `-WithKafka`, les événements restent durablement en attente. Les identifi
 ## Analytics — Phase 6
 
 La page http://localhost:8080/admin/analytics expose les données matérialisées avec contrôle des rôles et fraîcheur explicite. Démarrer avec `scripts/start-analytics.ps1`, vérifier avec `scripts/verify-analytics.ps1`, tester les reprises avec `scripts/test-analytics.ps1 -WithRecovery`, et arrêter avec `scripts/stop-analytics.ps1`. Le backfill est en lecture seule ; les checkpoints et données Delta restent dans MinIO. Voir [architecture, commandes et limites](docs/phase6-analytics.md) et [résultats mesurés](docs/phase6-execution.md).
+
+## Operations and compliance ? Phase 8
+
+The monitoring profile now provisions Prometheus, Grafana, Alertmanager, OpenTelemetry Collector/Jaeger and restricted database/Kafka exporters. The French admin UI exposes real monitoring, persistent business alerts and physical warehouse utilization. Phase 7 remains postponed.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-platform.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-platform.ps1
+.\.venv\Scripts\python.exe scripts/backup-platform.py --restore-isolated
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-platform.ps1
+```
+
+These commands preserve existing databases, offsets and checkpoints and do not reseed. See [compliance](docs/phase8-compliance-matrix.md), [observability](docs/phase8-observability.md), [alerts](docs/phase8-alerting.md), [logistics](docs/phase8-logistics.md), [resilience](docs/phase8-resilience.md), [recovery](docs/phase8-backup-recovery.md), [jury demonstrations](docs/phase8-jury-demo.md) and [actual verification results](docs/phase8-final-report.md). Backups and service credentials remain local.

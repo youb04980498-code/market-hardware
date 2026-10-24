@@ -43,6 +43,7 @@ class Warehouse(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     city: str = Field(min_length=1, max_length=100)
     capacity_units: int = Field(ge=0, le=10000000, strict=True)
+    classification: str = Field(default='OPERATIONAL', pattern='^(OPERATIONAL|TEST|ARCHIVED)$')
 
 
 class Adjustment(BaseModel):
@@ -157,8 +158,8 @@ def create_warehouse(body: Warehouse, user=USER):
             if any(existing[k] != v for k, v in body.model_dump().items()):
                 fail(409, 'IDEMPOTENCY_CONFLICT', 'Warehouse name already identifies different values')
             return existing
-        return conn.execute('INSERT INTO inventory.warehouses(name,city,capacity_units) VALUES(%s,%s,%s) RETURNING *',
-                            (body.name, body.city, body.capacity_units)).fetchone()
+        return conn.execute('INSERT INTO inventory.warehouses(name,city,capacity_units,classification) VALUES(%s,%s,%s,%s) RETURNING *',
+                            (body.name, body.city, body.capacity_units, body.classification)).fetchone()
 
 
 @app.post('/api/inventory/adjustments')
@@ -245,3 +246,17 @@ def internal_transition(order_id: int, action: str):
 @app.post('/internal/expire', dependencies=trusted)
 def internal_expire():
     return expire()
+
+
+@app.get('/api/inventory/warehouses')
+def warehouse_summary(include_test: bool = False, user=USER):
+    require_staff(user)
+    with transaction('inventory') as conn:
+        return {'items': conn.execute("""SELECT w.*,coalesce(sum(s.quantity),0) AS physical,
+            coalesce(sum(s.reserved_quantity),0) AS reserved,
+            coalesce(sum(s.quantity-s.reserved_quantity),0) AS available,
+            count(*) FILTER(WHERE s.quantity-s.reserved_quantity<=5) AS low_stock_count,
+            CASE WHEN w.capacity_units>0 THEN round(100.0*coalesce(sum(s.quantity),0)/w.capacity_units,2) END AS utilization_percent
+            FROM inventory.warehouses w LEFT JOIN inventory.stock s USING(warehouse_id)
+            WHERE (%s OR w.classification='OPERATIONAL') GROUP BY w.warehouse_id ORDER BY w.warehouse_id""", (include_test,)).fetchall(),
+            'capacity_unit': 'physical_item'}

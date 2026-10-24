@@ -83,6 +83,7 @@ def build_gold(spark):
         'revenue_quarterly': '''SELECT concat(year(created_at),'-Q',quarter(created_at)) AS period,
           sum(gross_cents) AS gross_cents,sum(refunded_cents) AS refunded_cents,sum(gross_cents-refunded_cents) AS net_cents
           FROM payment_facts WHERE status IN ('SUCCEEDED','REFUNDED') GROUP BY 1''',
+        'orders_hourly': '''SELECT date_format(created_at,'yyyy-MM-dd') AS date, hour(created_at) AS hour,count(*) AS order_count FROM orders GROUP BY 1,2''',
         'orders_daily': '''SELECT date_format(created_at,'yyyy-MM-dd') AS date,status,count(*) AS order_count,
           sum(total_cents) AS ordered_cents FROM orders GROUP BY 1,2''',
         'orders_monthly': '''SELECT date_format(created_at,'yyyy-MM') AS period,status,count(*) AS order_count FROM orders GROUP BY 1,2''',

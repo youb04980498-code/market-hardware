@@ -176,3 +176,6 @@ start-frontend, verify-frontend (three live smoke checks) and test-frontend were
 - scripts/start-frontend.ps1
 - scripts/test-frontend.ps1
 - scripts/verify-frontend.ps1
+
+
+Phase 8 supersedes the original Observability placeholder and extends Overview/Inventory using actual protected APIs; see phase8-observability.md and phase8-logistics.md. The AI placeholder remains unchanged.

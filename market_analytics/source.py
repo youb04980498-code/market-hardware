@@ -15,8 +15,9 @@ COLUMNS = {
     'refunds': ('payments.refunds', 'refund_id,payment_id,amount_cents,status,created_at'),
     'inventory': ('inventory.stock', 'product_id,warehouse_id,quantity,reserved_quantity,updated_at'),
     'warehouses': ('inventory.warehouses', 'warehouse_id,name,city,capacity_units'),
+    'warehouse_metadata': ('inventory.warehouses', 'warehouse_id,classification'),
 }
-TRANSFORM_VERSION = 'phase6-cumulative-cent-allocation-v2'
+TRANSFORM_VERSION = 'phase8-operational-metadata-v1'
 
 
 def customer_key(identifier):

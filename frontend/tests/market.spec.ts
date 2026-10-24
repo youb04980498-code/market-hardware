@@ -105,6 +105,7 @@ test.beforeAll(async ({ request }) => {
       name: "Phase5 browser verification " + randomUUID(),
       city: "Isolated E2E",
       capacity_units: 10000,
+      classification: "TEST",
     })
   ).warehouse_id;
   await api(
@@ -232,7 +233,12 @@ test("admin accesses all five groups, real orders, catalog and warehouses", asyn
   await expect(
     page.getByText("Produits actifs", { exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".metric").nth(1)).toHaveText("42");
+  await expect(
+    page
+      .locator('[data-slot="card"]')
+      .filter({ has: page.getByText("Produits actifs", { exact: true }) })
+      .locator(".metric"),
+  ).toHaveText("42");
   await page.getByRole("link", { name: "Commandes", exact: true }).click();
   await expect(
     page.getByRole("columnheader", { name: "Commande", exact: true }),
@@ -328,7 +334,9 @@ test("admin session survives reload, logout clears it and deep links preserve th
   await expect(
     page.getByRole("heading", { name: "Vue d'ensemble", exact: true }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Retour boutique", exact: true }).click();
+  await page
+    .getByRole("link", { name: "Retour boutique", exact: true })
+    .click();
   await page.getByRole("button", { name: "Déconnexion", exact: true }).click();
   await expect(page).toHaveURL(/login/);
   await page.goto("/account");
@@ -352,7 +360,7 @@ test("analytics uses materialized data and future integrations remain explicit",
   ).toBeVisible();
   await page.getByRole("link", { name: "Observabilité", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Supervision étendue" }),
+    page.getByRole("heading", { name: "Outils de supervision" }),
   ).toBeVisible();
 });
 for (const width of [375, 768, 1024, 1440])
@@ -378,9 +386,9 @@ for (const width of [375, 768, 1024, 1440])
       ),
     ).toBe(true);
     await login(page, "ADMIN", "/admin");
-    await expect(page.locator(".metric").nth(1)).toHaveText("42");
+    await expect(page.locator('[data-slot="card"]').filter({ has: page.getByText("Produits actifs", { exact: true }) }).locator(".metric")).toHaveText("42");
     await expect(page.locator(".metric").first()).toHaveText(/^\d+$/);
-    await expect(page.locator(".service-grid .service")).toHaveCount(4);
+    await expect(page.locator("section").filter({ has: page.getByRole("heading", {name: "Disponibilité des services", exact: true}) }).locator(".service-grid .service")).toHaveCount(4);
     await page.screenshot({
       path: resolve("..", ".local", "screenshots", `admin-${width}.png`),
       fullPage: true,
@@ -445,7 +453,7 @@ test("accessible storefront and admin have no serious or critical axe violations
     ),
   ).toEqual([]);
   await login(page, "ADMIN", "/admin");
-  await expect(page.locator(".metric").nth(1)).toHaveText("42");
+  await expect(page.locator('[data-slot="card"]').filter({ has: page.getByText("Produits actifs", { exact: true }) }).locator(".metric")).toHaveText("42");
   const admin = await new AxeBuilder({ page }).analyze();
   expect(
     admin.violations.filter((v) =>

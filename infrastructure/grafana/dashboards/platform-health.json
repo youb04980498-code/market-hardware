@@ -1,0 +1,202 @@
+{
+  "uid": "market-platform-health",
+  "title": "Platform Health",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Services",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Requetes / seconde",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(service)(rate(market_http_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Erreurs / seconde",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by(service)(rate(market_http_requests_total{status=~\"5..\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Latence p50",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.5,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Latence p95",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Latence p99",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.99,sum by(le,service)(rate(market_http_duration_seconds_bucket[5m])))"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Memoire processus",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "process_resident_memory_bytes"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "CPU processus",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(process_cpu_seconds_total[5m])"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "PostgreSQL",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "pg_up"
+        }
+      ]
+    }
+  ]
+}

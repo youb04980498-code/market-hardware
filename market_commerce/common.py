@@ -127,14 +127,19 @@ def remote(caller, target, method, path, body=None, bearer=None):
     headers = {'X-Service-Token': service_token(caller, target), 'X-Correlation-ID': correlation()}
     if bearer:
         headers['Authorization'] = 'Bearer ' + bearer
+    from market_commerce.resilience import DependencyUnavailable, circuit
     try:
-        with httpx.Client(timeout=httpx.Timeout(5, connect=2), trust_env=False) as client:
-            response = client.request(method, base + path, json=body, headers=headers)
+        with circuit(target).call():
+            with httpx.Client(timeout=httpx.Timeout(5, connect=2), trust_env=False,
+                    limits=httpx.Limits(max_connections=8, max_keepalive_connections=4)) as client:
+                response = client.request(method, base + path, json=body, headers=headers)
+            if response.status_code >= 500:
+                raise httpx.HTTPError('Dependency unavailable')
         if response.status_code >= 400:
             code = response.json().get('error', {}).get('code', 'UPSTREAM_REJECTED')
             raise RemoteError(response.status_code, code)
         return response.json()
-    except (httpx.HTTPError, ValueError):
+    except (httpx.HTTPError, ValueError, DependencyUnavailable):
         raise RemoteError(503) from None
 
 
@@ -168,6 +173,8 @@ def event(conn, schema, kind, aggregate_type, aggregate_id, payload, key=None):
 def create_app(service):
     app = FastAPI(title='Market Hardware ' + service.title(), docs_url=f'/api/{service}/docs',
                   openapi_url=f'/api/{service}/openapi.json', redoc_url=None)
+    from market_commerce.telemetry import instrument
+    instrument(app, service)
     def public_openapi():
         if app.openapi_schema is None:
             app.openapi_schema = get_openapi(title=app.title, version='4.0.0',

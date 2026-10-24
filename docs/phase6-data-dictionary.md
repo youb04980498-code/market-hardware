@@ -51,3 +51,6 @@ All consumption entity aggregates include release_id STRING and row_key STRING S
 Separate `market_analytics.public` owns releases, singleton current_release, pipeline_status, jobs, quarterly_reports and checksum schema_migrations. `data/analytics/*.sql` defines precise PostgreSQL types, constraints and API SELECT grants. Releases contain JSONB documents read back from committed Delta, not unfinished Spark frames. A pointer transaction atomically exposes complete versions. Quarterly keys are period+release; latest is selected by recorded completion time.
 
 Pipeline metrics distinguish Kafka transport rows, unique events, duplicate deliveries, invalid/conflicting rows, late rows, actual broker end offsets, processed end offsets, lag measurement time, Spark batch duration/throughput and successful snapshot verification. A last-known zero lag is never labelled a current measurement without its timestamp. Business source files and migrations remain unchanged.
+
+
+Phase8 governance catalogue and explicit four-zone lineage: [phase8-data-catalogue.md](phase8-data-catalogue.md). Original financial definitions remain unchanged.

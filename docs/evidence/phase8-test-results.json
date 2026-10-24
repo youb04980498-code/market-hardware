@@ -1,0 +1,99 @@
+{
+  "deduplication": "Latest execution by JUnit classname and testcase name; failed original reports retained locally. Durations are JUnit suite durations, not sum of unique checks.",
+  "runs": [
+    {
+      "report": "commerce-regressions.xml",
+      "tests": 269,
+      "failed": 1,
+      "skipped": 0,
+      "duration_seconds": 120.205
+    },
+    {
+      "report": "phase8-unit.xml",
+      "tests": 220,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 3.579
+    },
+    {
+      "report": "phase8-base-correction.xml",
+      "tests": 1,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 18.775
+    },
+    {
+      "report": "phase8-retention-schema.xml",
+      "tests": 1,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 2.6
+    },
+    {
+      "report": "phase8-regression-commerce.xml",
+      "tests": 46,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 278.526
+    },
+    {
+      "report": "phase8-regression-analytics.xml",
+      "tests": 29,
+      "failed": 1,
+      "skipped": 0,
+      "duration_seconds": 1415.208
+    },
+    {
+      "report": "phase8-analytics-correction.xml",
+      "tests": 1,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 226.393
+    },
+    {
+      "report": "phase8-acceptance.xml",
+      "tests": 10,
+      "failed": 1,
+      "skipped": 0,
+      "duration_seconds": 351.39
+    },
+    {
+      "report": "phase8-role-correction.xml",
+      "tests": 1,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 4.766
+    },
+    {
+      "report": "frontend-unit.xml",
+      "tests": 23,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 0.834
+    },
+    {
+      "report": "frontend-e2e.xml",
+      "tests": 26,
+      "failed": 6,
+      "skipped": 0,
+      "duration_seconds": 231.317
+    },
+    {
+      "report": "phase8-browser-correction.xml",
+      "tests": 6,
+      "failed": 5,
+      "skipped": 0,
+      "duration_seconds": 135.873
+    },
+    {
+      "report": "phase8-browser-final-correction.xml",
+      "tests": 5,
+      "failed": 0,
+      "skipped": 0,
+      "duration_seconds": 17.603
+    }
+  ],
+  "distinct_tests": 403,
+  "latest_passed": 403,
+  "latest_not_passed": []
+}

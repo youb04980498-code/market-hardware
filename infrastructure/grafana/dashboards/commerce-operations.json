@@ -1,0 +1,160 @@
+{
+  "uid": "market-commerce-operations",
+  "title": "Commerce Operations",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Alertes actives",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_operational_alerts"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Activite Orders",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(market_http_requests_total{service=\"orders\",method=\"POST\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Alertes paiements",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_operational_alerts{type=\"PAYMENT_FAILURE\"}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Stock faible",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_operational_alerts{type=\"LOW_STOCK\"}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Saturation entrepots",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_operational_alerts{type=\"WAREHOUSE_SATURATION\"}"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Commandes par etat",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_orders"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Etapes Saga et compensation",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_sagas"
+        }
+      ]
+    }
+  ]
+}

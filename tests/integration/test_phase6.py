@@ -19,7 +19,7 @@ from market_analytics.source import capture
 from tests.integration.test_phase4 import login, request
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture
 def tokens():
     cfg=dotenv_values(ROOT / '.env')
     return {name.lower():login(cfg[f'DEV_{name}_EMAIL'],cfg[f'DEV_{name}_PASSWORD'])['access_token']
@@ -188,7 +188,7 @@ def test_actual_driver_crash_before_pointer_recovers_queued_job():
 def test_late_partial_and_full_refunds_correct_original_cohort(tokens):
     from tests.integration.test_phase4 import wait_order
     wid=request('POST','/api/inventory/warehouses',tokens['admin'],
-        {'name':'Phase6 refund '+str(uuid4()),'city':'Analytics tests','capacity_units':10},expected=(201,)).json()['warehouse_id']
+        {'name':'Phase6 refund '+str(uuid4()),'city':'Analytics tests','capacity_units':10,'classification':'TEST'},expected=(201,)).json()['warehouse_id']
     request('POST','/api/inventory/adjustments',tokens['admin'],
         {'product_id':1001,'warehouse_id':wid,'delta':1,'reason':'Phase6 isolated refund verification'},key=uuid4())
     created=request('POST','/api/orders',tokens['customer'],
@@ -218,7 +218,7 @@ def test_late_partial_and_full_refunds_correct_original_cohort(tokens):
 def test_analytics_api_restart_and_checkout_during_analytics_outage(tokens):
     from tests.integration.test_phase4 import wait_order
     wid=request('POST','/api/inventory/warehouses',tokens['admin'],
-        {'name':'Phase6 outage '+str(uuid4()),'city':'Analytics tests','capacity_units':10},expected=(201,)).json()['warehouse_id']
+        {'name':'Phase6 outage '+str(uuid4()),'city':'Analytics tests','capacity_units':10,'classification':'TEST'},expected=(201,)).json()['warehouse_id']
     request('POST','/api/inventory/adjustments',tokens['admin'],
         {'product_id':1001,'warehouse_id':wid,'delta':1,'reason':'Phase6 outage verification'},key=uuid4())
     try:

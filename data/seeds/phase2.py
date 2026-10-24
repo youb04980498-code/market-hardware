@@ -8,7 +8,8 @@ import json
 import secrets
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
 
@@ -79,6 +80,8 @@ def timestamp(value):
 
 
 def canonical(value):
+    if isinstance(value, Decimal):
+        return str(value)
     if isinstance(value, datetime):
         return value.astimezone(UTC).isoformat()
     if isinstance(value, UUID):
@@ -277,7 +280,12 @@ def seed_sql(connection):
                     insert_preserving(connection, table, initial, ignore=['quantity', 'reserved_quantity'])
                 else:
                     insert_preserving(connection, table, record)
+        # Once retention has run, replaying fixtures must not resurrect expired technical logs.
+        # Commercial fixtures remain unchanged and are never subject to this policy.
+        retention_active = connection.execute("SELECT EXISTS(SELECT 1 FROM monitoring.log_purge_runs WHERE status='COMPLETE') AS active").fetchone()['active']
         for source in read_csv('monitoring/application_logs.csv'):
+            if retention_active and timestamp(source['created_at']) < datetime.now(UTC) - timedelta(days=7):
+                continue
             insert_preserving(connection, 'monitoring.application_logs', {
                 'log_id': int(source['log_id']), 'service_name': source['service'],
                 'level': source['level'], 'message': source['message'], 'created_at': timestamp(source['created_at'])})

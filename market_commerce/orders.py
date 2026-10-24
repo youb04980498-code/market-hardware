@@ -166,8 +166,11 @@ def create_order(body: Checkout, response: Response, idempotency_key: str = REQU
                     VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (oid, *[line[k] for k in ['product_id', 'quantity', 'unit_price_cents', 'sku', 'product_name', 'currency', 'publication_version', 'warehouse_id']]))
             conn.execute('INSERT INTO orders.checkout_requests(user_id,idempotency_key,request_hash,order_id) VALUES(%s,%s,%s,%s)', (user['user_id'], idempotency_key, request_hash, oid))
             plan = conn.execute('SELECT * FROM orders.test_plans WHERE user_id=%s AND idempotency_key=%s', (user['user_id'], idempotency_key)).fetchone()
-            conn.execute('''INSERT INTO orders.sagas(order_id,step,correlation_id,simulation,fault,reservation_ttl)
-                VALUES(%s,'RESERVE',%s,%s,%s,%s)''', (oid, correlation(), plan['simulation'] if plan else 'success', plan['fault'] if plan else None, plan['reservation_ttl'] if plan else 900))
+            from opentelemetry.propagate import inject
+            carrier = {}
+            inject(carrier)
+            conn.execute('''INSERT INTO orders.sagas(order_id,step,correlation_id,simulation,fault,reservation_ttl,traceparent)
+                VALUES(%s,'RESERVE',%s,%s,%s,%s,%s)''', (oid, correlation(), plan['simulation'] if plan else 'success', plan['fault'] if plan else None, plan['reservation_ttl'] if plan else 900, carrier.get('traceparent')))
     # Crash scenarios are intentionally executed by the separate worker, never by the API process.
     result = read_order(oid, user, True)
     if not result['saga']['fault'] or not result['saga']['fault'].startswith('crash_'):

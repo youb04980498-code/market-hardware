@@ -151,7 +151,15 @@ def drive(order_id=None, limit=8):
             return
         token = CORRELATION.set(str(job['correlation_id']))
         try:
-            step(job)
+            from opentelemetry import trace
+            from opentelemetry.propagate import extract
+
+            from market_commerce.telemetry import PROVIDERS
+            provider = PROVIDERS.get('orders')
+            tracer = provider.get_tracer('checkout-saga') if provider else trace.get_tracer('checkout-saga')
+            with tracer.start_as_current_span('checkout.' + job['step'].lower(),
+                    context=extract({'traceparent': job.get('traceparent') or ''})):
+                step(job)
         except RemoteError as exc:
             if job['step'] == 'RESERVE' and exc.status in (400, 404, 409, 422):
                 advance(job, 'RELEASE', failure='INVENTORY_REJECTED')

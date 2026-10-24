@@ -52,8 +52,12 @@ def refresh(spark, force=False, fault=None):
     with connect() as conn:
         current = conn.execute('SELECT release_id FROM current_release').fetchone()
         if current and current['release_id'] == release_id and not force and not fault:
+            from market_analytics.alerts import reconcile
+            reconcile(data)
             status('RUNNING', successful=True)
             return {'release_id': release_id, 'unchanged': True}
+    from market_analytics.alerts import reconcile
+    reconcile(data)
     cutoff = boundary['cutoff']
     raw = spark.createDataFrame([(release_id, cutoff.isoformat(), json.dumps(data))], 'release_id string,observed_at string,payload string')
     merge(spark, raw, 'raw/source_snapshots', ['release_id'])
@@ -63,12 +67,14 @@ def refresh(spark, force=False, fault=None):
         for column in ('created_at', 'updated_at'):
             if column in frame.columns:
                 frame = frame.withColumn(column, F.to_timestamp(column))
+        merge(spark, frame, 'staging/' + name, ['release_id', *KEYS[name]])
         merge(spark, frame, 'curated/' + name, ['release_id', *KEYS[name]])
         spark.read.format('delta').load(path('curated/' + name)).where(F.col('release_id') == release_id).createOrReplaceTempView(name)
     gold = build_gold(spark)
     document = {'release_id': release_id, 'snapshot_at': cutoff.isoformat(), 'snapshot_boundary': boundary['boundary'],
         'currency': 'EUR', 'timezone': 'UTC', 'transform_version': TRANSFORM_VERSION, 'classification_basis': 'current_published_category_or_UNKNOWN',
-        'revenue_basis': 'payment_creation_cohort_with_latest_known_refunds', 'tables': {}}
+        'revenue_basis': 'payment_creation_cohort_with_latest_known_refunds',
+        'warehouse_classification': {str(r['warehouse_id']): r['classification'] for r in data.get('warehouse_metadata', [])}, 'tables': {}}
     for name, frame in gold.items():
         materialized = frame.withColumn('release_id', F.lit(release_id))
         # The key is the complete deterministic row for an immutable release; duplicates are not transactions.

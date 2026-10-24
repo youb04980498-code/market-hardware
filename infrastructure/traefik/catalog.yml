@@ -4,7 +4,7 @@ http:
       rule: PathPrefix(`/api/analytics`)
       entryPoints: [web]
       service: analytics
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     frontend:
       rule: PathPrefix(`/`) && !PathPrefix(`/api`) && !PathPrefix(`/graphql`) && !PathPrefix(`/internal`) && !PathPrefix(`/health`)
       priority: 1
@@ -14,27 +14,27 @@ http:
       rule: PathPrefix(`/api/payments`)
       entryPoints: [web]
       service: payments
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     orders:
       rule: PathPrefix(`/api/orders`)
       entryPoints: [web]
       service: orders
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     inventory:
       rule: PathPrefix(`/api/inventory`)
       entryPoints: [web]
       service: inventory
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     auth:
       rule: PathPrefix(`/api/auth`)
       entryPoints: [web]
       service: auth
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     catalogue:
       rule: PathPrefix(`/graphql`)
       entryPoints: [web]
       service: catalogue
-      middlewares: [catalog-limit]
+      middlewares: [catalog-limit, gateway-rate]
     catalogue-health:
       rule: Path(`/health/catalog`)
       entryPoints: [web]
@@ -70,6 +70,11 @@ http:
         servers:
           - url: http://catalog-graphql:8080
   middlewares:
+    gateway-rate:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
     catalog-limit:
       buffering:
         maxRequestBodyBytes: 65536

@@ -62,7 +62,7 @@ def commerce():
               for name in ['ADMIN', 'CUSTOMER', 'OTHER']}
     users = {name: request('GET', '/api/auth/me', token).json() for name, token in tokens.items()}
     wid = request('POST', '/api/inventory/warehouses', tokens['admin'],
-        {'name': 'Phase4 verification ' + str(uuid4()), 'city': 'Local tests', 'capacity_units': 1000000}, expected=(201,)).json()['warehouse_id']
+        {'name': 'Phase4 verification ' + str(uuid4()), 'city': 'Local tests', 'capacity_units': 1000000, 'classification': 'TEST'}, expected=(201,)).json()['warehouse_id']
     for pid in [1001, 1002]:
         request('POST', '/api/inventory/adjustments', tokens['admin'],
                 {'product_id': pid, 'warehouse_id': wid, 'delta': 1000, 'reason': 'Isolated verification stock'}, key=uuid4())
@@ -289,7 +289,7 @@ def test_concurrent_duplicate_checkouts(commerce):
 
 def test_last_unit_is_not_oversold(commerce):
     wid = request('POST', '/api/inventory/warehouses', commerce['tokens']['admin'],
-        {'name': 'Final unit ' + str(uuid4()), 'city': 'Tests', 'capacity_units': 10}, expected=(201,)).json()['warehouse_id']
+        {'name': 'Final unit ' + str(uuid4()), 'city': 'Tests', 'capacity_units': 10, 'classification': 'TEST'}, expected=(201,)).json()['warehouse_id']
     request('POST', '/api/inventory/adjustments', commerce['tokens']['admin'],
         {'product_id': 1001, 'warehouse_id': wid, 'delta': 1, 'reason': 'Final-unit concurrency'}, key=uuid4())
     with ThreadPoolExecutor(max_workers=2) as pool:

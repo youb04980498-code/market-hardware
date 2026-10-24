@@ -4,6 +4,7 @@ COPY services/catalog-graphql/requirements.txt /app/requirements.txt
 COPY services/catalog-graphql/requirements.lock /app/requirements.lock
 RUN pip install --no-cache-dir -r requirements.txt -c requirements.lock
 COPY market_catalog /app/market_catalog
+COPY market_commerce /app/market_commerce
 COPY data/mongodb/schema /app/data/mongodb/schema
 COPY data/neo4j/compatibility_edges.csv /app/data/neo4j/compatibility_edges.csv
 RUN useradd --uid 10001 --create-home market

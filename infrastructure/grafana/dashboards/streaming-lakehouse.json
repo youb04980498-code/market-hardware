@@ -1,0 +1,202 @@
+{
+  "uid": "market-streaming-lakehouse",
+  "title": "Streaming Lakehouse",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "15s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Retard Kafka",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_kafka_lag"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Debit Kafka",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(kafka_topic_partition_current_offset[5m]))"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Entrees Spark / seconde",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_spark_input_rows_per_second"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Traitement Spark / seconde",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_spark_processed_rows_per_second"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Quarantaine",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_quarantine_records"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Pipeline",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_pipeline_healthy"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Fraicheur analytique",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_analytics_freshness_seconds"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Duree refresh",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_analytics_refresh_seconds"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Echecs batch persistants",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "market-prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "market_spark_batch_jobs{status=\"ERROR\"}"
+        }
+      ]
+    }
+  ]
+}

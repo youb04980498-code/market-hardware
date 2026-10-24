@@ -1,5 +1,7 @@
+import Warehouses from "./Warehouses";
 import { useState } from "react";
 import { products, warehouses } from "../../api/market";
+import { request } from "../../api/client";
 import { useResource } from "../../hooks/useResource";
 import { State } from "../../shared/State";
 import {
@@ -12,6 +14,15 @@ import {
 } from "../../shared/table";
 export default function Inventory() {
   const [pid, setPid] = useState("1001");
+  const [includeTestStock, setIncludeTestStock] = useState(false);
+  const metadata = useResource(
+    () =>
+      request<{ items: { warehouse_id: number; classification: string }[] }>(
+        "/api/inventory/warehouses?include_test=true",
+      ),
+    "stock-warehouse-classification",
+    15000,
+  );
   const catalog = useResource(
     () => products({ pageSize: 100 }),
     "stock-products",
@@ -21,6 +32,7 @@ export default function Inventory() {
     <div className="admin-page">
       <p className="eyebrow">SOURCE : INVENTORY REST</p>
       <h1>Inventaire</h1>
+      <Warehouses />
       <label className="inventory-select">
         Produit
         <select value={pid} onChange={(e) => setPid(e.target.value)}>
@@ -32,6 +44,15 @@ export default function Inventory() {
         </select>
       </label>
       <State {...catalog} />
+      <label className="ops-toggle">
+        <input
+          type="checkbox"
+          checked={includeTestStock}
+          onChange={(e) => setIncludeTestStock(e.target.checked)}
+        />
+        Inclure les stocks de test et archivés
+      </label>
+      <State {...metadata} />
       <State {...data} empty={data.data?.length === 0} />
       <Table>
         <TableHeader>
@@ -49,27 +70,37 @@ export default function Inventory() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.data?.map((w) => (
-            <TableRow key={w.warehouse_id}>
-              <TableCell>
-                {w.name}
-                <small>#{w.warehouse_id}</small>
-              </TableCell>
-              <TableCell>{w.city}</TableCell>
-              <TableCell>{w.quantity}</TableCell>
-              <TableCell>{w.reserved_quantity}</TableCell>
-              <TableCell>{w.available}</TableCell>
-              <TableCell>
-                <span className="pill">
-                  {w.available === 0
-                    ? "Rupture"
-                    : w.available < 5
-                      ? "Stock faible"
-                      : "Disponible"}
-                </span>
-              </TableCell>
-            </TableRow>
-          ))}
+          {data.data
+            ?.filter(
+              (w) =>
+                includeTestStock ||
+                metadata.data?.items.some(
+                  (m) =>
+                    m.warehouse_id === w.warehouse_id &&
+                    m.classification === "OPERATIONAL",
+                ),
+            )
+            .map((w) => (
+              <TableRow key={w.warehouse_id}>
+                <TableCell>
+                  {w.name}
+                  <small>#{w.warehouse_id}</small>
+                </TableCell>
+                <TableCell>{w.city}</TableCell>
+                <TableCell>{w.quantity}</TableCell>
+                <TableCell>{w.reserved_quantity}</TableCell>
+                <TableCell>{w.available}</TableCell>
+                <TableCell>
+                  <span className="pill">
+                    {w.available === 0
+                      ? "Rupture"
+                      : w.available < 5
+                        ? "Stock faible"
+                        : "Disponible"}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
       <section className="notice">

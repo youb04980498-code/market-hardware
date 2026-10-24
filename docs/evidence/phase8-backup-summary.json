@@ -1,0 +1,61 @@
+{
+  "identity": "20261024T070107Z_912478",
+  "started_at": "2026-10-24T07:01:07.368747+00:00",
+  "stores": {
+    "postgres": {
+      "bytes": 461031,
+      "table_counts": {
+        "auth.outbox_events": 40,
+        "auth.rate_limits": 6,
+        "auth.refresh_sessions": 325,
+        "auth.roles": 3,
+        "auth.user_roles": 38,
+        "auth.users": 38,
+        "inventory.adjustments": 81,
+        "inventory.outbox_events": 497,
+        "inventory.reservations": 211,
+        "inventory.stock": 188,
+        "inventory.warehouses": 51,
+        "monitoring.application_logs": 75,
+        "monitoring.business_audit": 1806,
+        "monitoring.consumer_inbox": 8,
+        "monitoring.log_purge_runs": 1,
+        "monitoring.schema_migrations": 12,
+        "monitoring.worker_status": 1,
+        "orders.checkout_requests": 212,
+        "orders.customers": 22,
+        "orders.order_items": 353,
+        "orders.orders": 284,
+        "orders.outbox_events": 700,
+        "orders.saga_attempts": 718,
+        "orders.sagas": 212,
+        "orders.test_plans": 128,
+        "payments.financial_audit": 199,
+        "payments.invoices": 61,
+        "payments.notification_deliveries": 61,
+        "payments.outbox_events": 525,
+        "payments.payment_attempts": 196,
+        "payments.payments": 255,
+        "payments.refunds": 36
+      },
+      "restore": "PASS"
+    },
+    "mongodb": {
+      "bytes": 14062,
+      "products": 43,
+      "restore": "PASS"
+    },
+    "neo4j": {
+      "nodes": 43,
+      "relationships": 163,
+      "restore": "PASS"
+    },
+    "minio": {
+      "objects": 3702,
+      "bytes": 33051181,
+      "restore": "PASS"
+    }
+  },
+  "duration_seconds": 173.359,
+  "scope": "Four isolated logical/object restore rehearsals. PIM export additionally executed privately; full PIM restore not rehearsed. Not a coordinated cross-store snapshot."
+}

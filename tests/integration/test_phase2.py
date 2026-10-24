@@ -32,7 +32,12 @@ def test_postgres_counts_and_schema_boundaries(connection):
                 'orders.customers':20, 'orders.orders':72, 'orders.order_items':140,
                 'inventory.warehouses':3, 'inventory.stock':126, 'inventory.reservations':6,
                 'payments.payments':67, 'payments.invoices':61,
-                'payments.notification_deliveries':61, 'monitoring.application_logs':80}
+                'payments.notification_deliveries':61}
+    purge = connection.execute("SELECT max(ended_at) AS ended_at FROM monitoring.log_purge_runs WHERE status='COMPLETE'").fetchone()['ended_at']
+    from datetime import timedelta
+    expected['monitoring.application_logs'] = sum(
+        not purge or db.timestamp(row['created_at']) >= purge - timedelta(days=7)
+        for row in db.read_csv('monitoring/application_logs.csv'))
     for table, count in expected.items():
         assert connection.execute('SELECT count(*) AS n FROM '+table).fetchone()['n'] >= count
     # Phase 4 adds retained, isolated commerce records; verify every historical source row itself.

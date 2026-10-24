@@ -1,0 +1,401 @@
+{
+  "observed_at": "2026-10-24T08:21:52.222528+00:00",
+  "schemas": [
+    "auth",
+    "inventory",
+    "monitoring",
+    "orders",
+    "payments"
+  ],
+  "incomplete_sagas": 0,
+  "outboxes_pending": {
+    "auth": 0,
+    "orders": 0,
+    "inventory": 0,
+    "payments": 0
+  },
+  "correlated_technical_logs": 3750,
+  "disabled_fixture_users": 22,
+  "catalog_products": 43,
+  "catalog_active": 42,
+  "product_sync_unresolved": 0,
+  "graph": {
+    "products": 43,
+    "relationships": 163
+  },
+  "analytics": {
+    "release_id": "2f928fb1e02b3c106aa91c788921aee574c125ea1edc5551d3c83c27a25bc5c1",
+    "snapshot_at": "2026-10-24T08:18:32.432534+00:00",
+    "last_refresh_at": "2026-10-24 08:19:52.359731+00:00",
+    "published_at": "2026-10-24 08:19:52.336493+00:00",
+    "freshness_seconds": 120.991833,
+    "stale": false,
+    "pipeline_state": "REFRESHING",
+    "error_code": null,
+    "currency": "EUR",
+    "timezone": "UTC",
+    "revenue_basis": "payment_creation_cohort_with_latest_known_refunds",
+    "classification_basis": "current_published_category_or_UNKNOWN"
+  },
+  "reconciliation": {
+    "checks": [
+      {
+        "metric": "order_count",
+        "source": 364,
+        "analytical": 364,
+        "difference": 0
+      },
+      {
+        "metric": "paid_order_count",
+        "source": 260,
+        "analytical": 260,
+        "difference": 0
+      },
+      {
+        "metric": "gross_cents",
+        "source": 7255300,
+        "analytical": 7255300,
+        "difference": 0
+      },
+      {
+        "metric": "refunded_cents",
+        "source": 890500,
+        "analytical": 890500,
+        "difference": 0
+      },
+      {
+        "metric": "net_cents",
+        "source": 6364800,
+        "analytical": 6364800,
+        "difference": 0
+      },
+      {
+        "metric": "line_quantity",
+        "source": 515,
+        "analytical": 515,
+        "difference": 0
+      },
+      {
+        "metric": "sold_quantity",
+        "source": 417,
+        "analytical": 417,
+        "difference": 0
+      },
+      {
+        "metric": "product_gross_cents",
+        "source": 7255300,
+        "analytical": 7255300,
+        "difference": 0
+      },
+      {
+        "metric": "product_refunded_cents",
+        "source": 890500,
+        "analytical": 890500,
+        "difference": 0
+      },
+      {
+        "metric": "product_net_cents",
+        "source": 6364800,
+        "analytical": 6364800,
+        "difference": 0
+      },
+      {
+        "metric": "inventory_quantity",
+        "source": 42404,
+        "analytical": 42404,
+        "difference": 0
+      },
+      {
+        "metric": "inventory_reserved_quantity",
+        "source": 11,
+        "analytical": 11,
+        "difference": 0
+      },
+      {
+        "metric": "registered_customers",
+        "source": 22,
+        "analytical": 22,
+        "difference": 0
+      }
+    ],
+    "status": "PASS",
+    "checked_at": "2026-10-24T08:18:32.432534+00:00",
+    "source_boundary": "26209:26209:"
+  },
+  "pipeline": {
+    "singleton": true,
+    "state": "REFRESHING",
+    "checked_at": "2026-10-24 08:20:23.568261+00:00",
+    "last_success_at": "2026-10-24 08:19:52.359731+00:00",
+    "error_code": null,
+    "metrics": {
+      "kafka_lag": 11,
+      "release_id": "2f928fb1e02b3c106aa91c788921aee574c125ea1edc5551d3c83c27a25bc5c1",
+      "late_records": 1687,
+      "last_batch_id": 52,
+      "unique_events": 2383,
+      "bronze_records": 2414,
+      "invalid_records": 18,
+      "lag_measured_at": "2026-10-24T08:19:52.400324+00:00",
+      "batch_input_rows": 6,
+      "duplicate_records": 13,
+      "last_ingestion_at": "2026-10-24T08:20:23.540923+00:00",
+      "partition_progress": [
+        {
+          "topic": "market.auth.v1",
+          "partition": 0,
+          "end_offset": 56,
+          "retained_start": 0,
+          "processed_end_offset": 56
+        },
+        {
+          "topic": "market.payments.v1",
+          "partition": 0,
+          "end_offset": 706,
+          "retained_start": 0,
+          "processed_end_offset": 706
+        },
+        {
+          "topic": "market.inventory.v1",
+          "partition": 0,
+          "end_offset": 700,
+          "retained_start": 0,
+          "processed_end_offset": 689
+        },
+        {
+          "topic": "market.orders.v1",
+          "partition": 0,
+          "end_offset": 957,
+          "retained_start": 0,
+          "processed_end_offset": 957
+        }
+      ],
+      "last_refresh_seconds": 79.973,
+      "input_rows_per_second": 0.3224448484957052,
+      "last_batch_duration_ms": 190803,
+      "processed_rows_per_second": 0.1886762786748636
+    }
+  },
+  "prometheus_targets": [
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "commerce",
+      "health": "up"
+    },
+    {
+      "job": "kafka",
+      "health": "up"
+    },
+    {
+      "job": "minio",
+      "health": "up"
+    },
+    {
+      "job": "mongodb",
+      "health": "up"
+    },
+    {
+      "job": "postgres",
+      "health": "up"
+    },
+    {
+      "job": "prometheus",
+      "health": "up"
+    },
+    {
+      "job": "traefik",
+      "health": "up"
+    }
+  ],
+  "docker_services": [
+    {
+      "service": "alertmanager",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "analytics",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "analytics-worker",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "auth",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "catalog-graphql",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "checkout-saga",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "frontend",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "grafana",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "inventory",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "jaeger",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "kafka",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "kafka-exporter",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "log-retention",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "minio",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "mongo",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "mongodb-exporter",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "neo4j",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "orders",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "otel-collector",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "outbox-publisher",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "payments",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "postgres",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "postgres-exporter",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "product-sync",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "prometheus",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "redis",
+      "state": "running",
+      "health": "no Docker healthcheck; see endpoint/scrape checks"
+    },
+    {
+      "service": "traefik",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-elasticsearch",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-mailpit",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-pgsql",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-queue",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-redis",
+      "state": "running",
+      "health": "healthy"
+    },
+    {
+      "service": "unopim-scheduler",
+      "state": "running",
+      "health": "healthy"
+    }
+  ]
+}

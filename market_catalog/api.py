@@ -236,6 +236,10 @@ async def context():
     return {'catalogue': app.state.catalogue}
 
 
+from market_commerce.telemetry import instrument
+
+instrument(app, 'catalog')
+
 app.include_router(GraphQLRouter(schema, context_getter=context, graphql_ide='graphiql'), prefix='/graphql')
 
 

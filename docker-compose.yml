@@ -4,6 +4,7 @@ include:
     env_file: ./infrastructure/unopim/.env
 x-commerce-env: &commerce-env
   PG_HOST: postgres
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
   JWT_SECRET: ${JWT_SECRET}
   INTERNAL_JWT_SECRET: ${INTERNAL_JWT_SECRET}
   COMMERCE_TESTING: ${COMMERCE_TESTING:-0}
@@ -45,6 +46,11 @@ services:
       JAVA_TOOL_OPTIONS: -XX:ActiveProcessorCount=2
       PYSPARK_SUBMIT_ARGS: --driver-memory 1g pyspark-shell
       ANALYTICS_TESTING: ${ANALYTICS_TESTING:-0}
+      ANALYTICS_LOW_STOCK_THRESHOLD: ${ANALYTICS_LOW_STOCK_THRESHOLD:-5}
+      WAREHOUSE_SATURATION_PERCENT: ${WAREHOUSE_SATURATION_PERCENT:-90}
+      ORDER_SPIKE_MIN_COUNT: ${ORDER_SPIKE_MIN_COUNT:-10}
+      ORDER_SPIKE_BASELINE_PER_5M: ${ORDER_SPIKE_BASELINE_PER_5M:-5}
+      ORDER_SPIKE_FACTOR: ${ORDER_SPIKE_FACTOR:-3}
       ANALYTICS_REFRESH_SECONDS: ${ANALYTICS_REFRESH_SECONDS:-60}
     mem_limit: 2500m
     cpus: 2.0
@@ -64,6 +70,9 @@ services:
     command: [uvicorn, market_analytics.api:app, --host, 0.0.0.0, --port, '8080']
     environment:
       PG_HOST: postgres
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      PROMETHEUS_URL: http://prometheus:9090
+      ALERTMANAGER_URL: http://alertmanager:9093
       PG_ANALYTICS_API_PASSWORD: ${PG_ANALYTICS_API_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET}
       AUTH_URL: http://auth:8080
@@ -189,6 +198,7 @@ services:
       context: .
       dockerfile: services/catalog-graphql/Dockerfile
     environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       MONGO_HOST: mongo
       MONGO_CATALOG_READ_USER: ${MONGO_CATALOG_READ_USER}
       MONGO_CATALOG_READ_PASSWORD: ${MONGO_CATALOG_READ_PASSWORD}
@@ -244,6 +254,10 @@ services:
       - --providers.file.filename=/etc/traefik/catalog.yml
       - --ping=true
       - --accesslog=true
+      - --accesslog.format=json
+      - --entrypoints.metrics.address=:8082
+      - --metrics.prometheus=true
+      - --metrics.prometheus.entrypoint=metrics
     ports:
       - "127.0.0.1:8080:80"
     volumes:
@@ -356,6 +370,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
@@ -365,11 +380,13 @@ services:
 
   prometheus:
     image: prom/prometheus:v3.5.0
+    command: ['--config.file=/etc/prometheus/prometheus.yml', '--storage.tsdb.retention.time=15d']
     profiles: [monitoring]
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
       - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/prometheus/rules.yml:/etc/prometheus/rules.yml:ro
       - promdata:/prometheus
     restart: unless-stopped
 
@@ -383,8 +400,77 @@ services:
       - "127.0.0.1:3000:3000"
     volumes:
       - grafanadata:/var/lib/grafana
+      - ./infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  log-retention:
+    <<: *commerce
+    command: [python, -m, market_commerce.log_retention]
+    profiles: [monitoring]
+    environment:
+      PG_LOG_RETENTION_PASSWORD: ${PG_LOG_RETENTION_PASSWORD:-}
+    healthcheck:
+      disable: true
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    profiles: [monitoring]
+    command: ['--config.file=/etc/alertmanager/alertmanager.yml','--storage.path=/alertmanager','--data.retention=120h']
+    volumes:
+      - ./infrastructure/prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertdata:/alertmanager
+    ports: ['127.0.0.1:9093:9093']
+    restart: unless-stopped
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    profiles: [monitoring]
+    command: ['--config=/etc/otelcol/config.yml']
+    volumes: ['./infrastructure/otel/collector.yml:/etc/otelcol/config.yml:ro']
+    restart: unless-stopped
+  jaeger-storage-init:
+    image: postgres:16-alpine
+    profiles: [monitoring]
+    user: '0:0'
+    entrypoint: [sh, -c, 'chown -R 10001:10001 /badger']
+    volumes: [tracedata:/badger]
+    restart: 'no'
+  jaeger:
+    image: jaegertracing/all-in-one:1.66.0
+    command: ['--badger.span-store-ttl=72h']
+    depends_on:
+      jaeger-storage-init:
+        condition: service_completed_successfully
+    profiles: [monitoring]
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+      SPAN_STORAGE_TYPE: badger
+      BADGER_EPHEMERAL: 'false'
+      BADGER_DIRECTORY_VALUE: /badger/data
+      BADGER_DIRECTORY_KEY: /badger/key
+    volumes: [tracedata:/badger]
+    ports: ['127.0.0.1:16686:16686']
+    restart: unless-stopped
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.43.1
+    profiles: [monitoring]
+    environment:
+      MONGODB_URI: ${MONGODB_MONITOR_URI:-}
+    command: ['--collect-all']
+    restart: unless-stopped
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    profiles: [monitoring]
+    command: ['--kafka.server=kafka:19092']
+    restart: unless-stopped
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.17.1
+    profiles: [monitoring]
+    environment:
+      DATA_SOURCE_URI: postgres:5432/market_db?sslmode=disable
+      DATA_SOURCE_USER: market_monitor
+      DATA_SOURCE_PASS: ${PG_MONITOR_PASSWORD:-}
     restart: unless-stopped
 
 volumes:
@@ -397,3 +483,5 @@ volumes:
   miniodata:
   promdata:
   grafanadata:
+  alertdata:
+  tracedata:

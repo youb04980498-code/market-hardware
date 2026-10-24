@@ -151,8 +151,19 @@ def main():
                 .writeStream.foreachBatch(lambda frame, bid: ingest(spark, frame, bid))
                 .option('checkpointLocation', path('checkpoints/kafka_ingestion_v1'))
                 .trigger(processingTime='15 seconds').start())
+            from market_analytics.alerts import spikes, windowed_orders
+            spike_source = (spark.readStream.format('kafka')
+                .option('kafka.bootstrap.servers', env().get('KAFKA_BOOTSTRAP_SERVERS', 'kafka:19092'))
+                .option('subscribe', 'market.orders.v1').option('startingOffsets', 'latest')
+                .option('failOnDataLoss', 'true').load())
+            spike_query = (windowed_orders(spike_source).writeStream.outputMode('update')
+                .foreachBatch(spikes)
+                .option('checkpointLocation', path('checkpoints/order_spikes_v1'))
+                .trigger(processingTime='30 seconds').start())
             refreshed = time.monotonic()
             while query.isActive:
+                if not spike_query.isActive:
+                    raise RuntimeError('SPIKE_STREAM_TERMINATED')
                 query.awaitTermination(2)
                 if process_job(spark):
                     refreshed = time.monotonic()

@@ -1,0 +1,10 @@
+{
+  "delta_versions": 44,
+  "restored_version": 0,
+  "restored_rows": 172,
+  "isolated_path": "s3a://market-lakehouse/recovery/phase8/cc15030b87eb4d058753cfac9c7945ac/orders",
+  "window_dedup_restart": "PASS",
+  "late_events_dropped": 1,
+  "four_zones": "PASS",
+  "pseudonymization": "PASS"
+}

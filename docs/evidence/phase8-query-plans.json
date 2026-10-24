@@ -1,0 +1,1136 @@
+{
+  "indexes": [
+    {
+      "schemaname": "auth",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_occurred_at_idx",
+      "indexdef": "CREATE INDEX outbox_events_occurred_at_idx ON auth.outbox_events USING btree (occurred_at) WHERE (published_at IS NULL)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_pkey",
+      "indexdef": "CREATE UNIQUE INDEX outbox_events_pkey ON auth.outbox_events USING btree (event_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "rate_limits",
+      "indexname": "rate_limits_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rate_limits_pkey ON auth.rate_limits USING btree (bucket)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "refresh_sessions",
+      "indexname": "refresh_family_idx",
+      "indexdef": "CREATE INDEX refresh_family_idx ON auth.refresh_sessions USING btree (family_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "refresh_sessions",
+      "indexname": "refresh_sessions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX refresh_sessions_pkey ON auth.refresh_sessions USING btree (session_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "refresh_sessions",
+      "indexname": "refresh_sessions_token_hash_key",
+      "indexdef": "CREATE UNIQUE INDEX refresh_sessions_token_hash_key ON auth.refresh_sessions USING btree (token_hash)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "refresh_sessions",
+      "indexname": "refresh_user_idx",
+      "indexdef": "CREATE INDEX refresh_user_idx ON auth.refresh_sessions USING btree (user_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "roles",
+      "indexname": "roles_name_key",
+      "indexdef": "CREATE UNIQUE INDEX roles_name_key ON auth.roles USING btree (name)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "roles",
+      "indexname": "roles_pkey",
+      "indexdef": "CREATE UNIQUE INDEX roles_pkey ON auth.roles USING btree (role_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "user_roles",
+      "indexname": "user_roles_pkey",
+      "indexdef": "CREATE UNIQUE INDEX user_roles_pkey ON auth.user_roles USING btree (user_id, role_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "user_roles",
+      "indexname": "user_roles_role_idx",
+      "indexdef": "CREATE INDEX user_roles_role_idx ON auth.user_roles USING btree (role_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "users",
+      "indexname": "auth_email_unique",
+      "indexdef": "CREATE UNIQUE INDEX auth_email_unique ON auth.users USING btree (lower(email)) WHERE (email IS NOT NULL)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "users",
+      "indexname": "users_pkey",
+      "indexdef": "CREATE UNIQUE INDEX users_pkey ON auth.users USING btree (user_id)"
+    },
+    {
+      "schemaname": "auth",
+      "tablename": "users",
+      "indexname": "users_username_key",
+      "indexdef": "CREATE UNIQUE INDEX users_username_key ON auth.users USING btree (username)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "adjustments",
+      "indexname": "adjustments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX adjustments_pkey ON inventory.adjustments USING btree (adjustment_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_occurred_at_idx",
+      "indexdef": "CREATE INDEX outbox_events_occurred_at_idx ON inventory.outbox_events USING btree (occurred_at) WHERE (published_at IS NULL)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_pkey",
+      "indexdef": "CREATE UNIQUE INDEX outbox_events_pkey ON inventory.outbox_events USING btree (event_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "reservations",
+      "indexname": "reservation_expiry_idx",
+      "indexdef": "CREATE INDEX reservation_expiry_idx ON inventory.reservations USING btree (expires_at) WHERE ((status = 'ACTIVE'::text) AND (expires_at IS NOT NULL))"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "reservations",
+      "indexname": "reservations_order_id_product_id_warehouse_id_key",
+      "indexdef": "CREATE UNIQUE INDEX reservations_order_id_product_id_warehouse_id_key ON inventory.reservations USING btree (order_id, product_id, warehouse_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "reservations",
+      "indexname": "reservations_pkey",
+      "indexdef": "CREATE UNIQUE INDEX reservations_pkey ON inventory.reservations USING btree (reservation_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "reservations",
+      "indexname": "reservations_stock_idx",
+      "indexdef": "CREATE INDEX reservations_stock_idx ON inventory.reservations USING btree (product_id, warehouse_id, status)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "stock",
+      "indexname": "stock_pkey",
+      "indexdef": "CREATE UNIQUE INDEX stock_pkey ON inventory.stock USING btree (product_id, warehouse_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "stock",
+      "indexname": "stock_warehouse_idx",
+      "indexdef": "CREATE INDEX stock_warehouse_idx ON inventory.stock USING btree (warehouse_id)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "warehouses",
+      "indexname": "warehouses_classification_idx",
+      "indexdef": "CREATE INDEX warehouses_classification_idx ON inventory.warehouses USING btree (classification)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "warehouses",
+      "indexname": "warehouses_name_key",
+      "indexdef": "CREATE UNIQUE INDEX warehouses_name_key ON inventory.warehouses USING btree (name)"
+    },
+    {
+      "schemaname": "inventory",
+      "tablename": "warehouses",
+      "indexname": "warehouses_pkey",
+      "indexdef": "CREATE UNIQUE INDEX warehouses_pkey ON inventory.warehouses USING btree (warehouse_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "application_logs",
+      "indexname": "application_logs_pkey",
+      "indexdef": "CREATE UNIQUE INDEX application_logs_pkey ON monitoring.application_logs USING btree (log_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "application_logs",
+      "indexname": "logs_created_idx",
+      "indexdef": "CREATE INDEX logs_created_idx ON monitoring.application_logs USING btree (created_at)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "application_logs",
+      "indexname": "logs_service_idx",
+      "indexdef": "CREATE INDEX logs_service_idx ON monitoring.application_logs USING btree (service_name, created_at)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "application_logs",
+      "indexname": "logs_trace_idx",
+      "indexdef": "CREATE INDEX logs_trace_idx ON monitoring.application_logs USING btree (trace_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "business_audit",
+      "indexname": "business_audit_pkey",
+      "indexdef": "CREATE UNIQUE INDEX business_audit_pkey ON monitoring.business_audit USING btree (audit_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "consumer_inbox",
+      "indexname": "consumer_inbox_pkey",
+      "indexdef": "CREATE UNIQUE INDEX consumer_inbox_pkey ON monitoring.consumer_inbox USING btree (consumer_name, event_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "log_purge_runs",
+      "indexname": "log_purge_runs_pkey",
+      "indexdef": "CREATE UNIQUE INDEX log_purge_runs_pkey ON monitoring.log_purge_runs USING btree (run_id)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "schema_migrations",
+      "indexname": "schema_migrations_pkey",
+      "indexdef": "CREATE UNIQUE INDEX schema_migrations_pkey ON monitoring.schema_migrations USING btree (version)"
+    },
+    {
+      "schemaname": "monitoring",
+      "tablename": "worker_status",
+      "indexname": "worker_status_pkey",
+      "indexdef": "CREATE UNIQUE INDEX worker_status_pkey ON monitoring.worker_status USING btree (worker_name)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "checkout_requests",
+      "indexname": "checkout_requests_order_id_key",
+      "indexdef": "CREATE UNIQUE INDEX checkout_requests_order_id_key ON orders.checkout_requests USING btree (order_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "checkout_requests",
+      "indexname": "checkout_requests_pkey",
+      "indexdef": "CREATE UNIQUE INDEX checkout_requests_pkey ON orders.checkout_requests USING btree (user_id, idempotency_key)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "customers",
+      "indexname": "customers_auth_user_id_key",
+      "indexdef": "CREATE UNIQUE INDEX customers_auth_user_id_key ON orders.customers USING btree (auth_user_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "customers",
+      "indexname": "customers_email_key",
+      "indexdef": "CREATE UNIQUE INDEX customers_email_key ON orders.customers USING btree (email)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "customers",
+      "indexname": "customers_pkey",
+      "indexdef": "CREATE UNIQUE INDEX customers_pkey ON orders.customers USING btree (customer_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "order_items",
+      "indexname": "order_items_order_id_product_id_key",
+      "indexdef": "CREATE UNIQUE INDEX order_items_order_id_product_id_key ON orders.order_items USING btree (order_id, product_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "order_items",
+      "indexname": "order_items_pkey",
+      "indexdef": "CREATE UNIQUE INDEX order_items_pkey ON orders.order_items USING btree (order_item_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "order_items",
+      "indexname": "order_items_product_idx",
+      "indexdef": "CREATE INDEX order_items_product_idx ON orders.order_items USING btree (product_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "orders",
+      "indexname": "checkout_idempotency",
+      "indexdef": "CREATE UNIQUE INDEX checkout_idempotency ON orders.orders USING btree (auth_user_id, checkout_key) WHERE (checkout_key IS NOT NULL)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "orders",
+      "indexname": "orders_customer_idx",
+      "indexdef": "CREATE INDEX orders_customer_idx ON orders.orders USING btree (customer_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "orders",
+      "indexname": "orders_pkey",
+      "indexdef": "CREATE UNIQUE INDEX orders_pkey ON orders.orders USING btree (order_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "orders",
+      "indexname": "orders_status_time_idx",
+      "indexdef": "CREATE INDEX orders_status_time_idx ON orders.orders USING btree (status, created_at)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_occurred_at_idx",
+      "indexdef": "CREATE INDEX outbox_events_occurred_at_idx ON orders.outbox_events USING btree (occurred_at) WHERE (published_at IS NULL)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_pkey",
+      "indexdef": "CREATE UNIQUE INDEX outbox_events_pkey ON orders.outbox_events USING btree (event_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "saga_attempts",
+      "indexname": "saga_attempt_order_idx",
+      "indexdef": "CREATE INDEX saga_attempt_order_idx ON orders.saga_attempts USING btree (order_id, created_at)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "saga_attempts",
+      "indexname": "saga_attempts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX saga_attempts_pkey ON orders.saga_attempts USING btree (attempt_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "sagas",
+      "indexname": "saga_due_idx",
+      "indexdef": "CREATE INDEX saga_due_idx ON orders.sagas USING btree (next_attempt_at) WHERE (step <> 'DONE'::text)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "sagas",
+      "indexname": "sagas_pkey",
+      "indexdef": "CREATE UNIQUE INDEX sagas_pkey ON orders.sagas USING btree (order_id)"
+    },
+    {
+      "schemaname": "orders",
+      "tablename": "test_plans",
+      "indexname": "test_plans_pkey",
+      "indexdef": "CREATE UNIQUE INDEX test_plans_pkey ON orders.test_plans USING btree (user_id, idempotency_key)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "financial_audit",
+      "indexname": "financial_audit_operation_reference_key",
+      "indexdef": "CREATE UNIQUE INDEX financial_audit_operation_reference_key ON payments.financial_audit USING btree (operation, reference)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "financial_audit",
+      "indexname": "financial_audit_pkey",
+      "indexdef": "CREATE UNIQUE INDEX financial_audit_pkey ON payments.financial_audit USING btree (audit_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "invoices",
+      "indexname": "invoices_invoice_number_key",
+      "indexdef": "CREATE UNIQUE INDEX invoices_invoice_number_key ON payments.invoices USING btree (invoice_number)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "invoices",
+      "indexname": "invoices_order_idx",
+      "indexdef": "CREATE INDEX invoices_order_idx ON payments.invoices USING btree (order_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "invoices",
+      "indexname": "invoices_payment_id_key",
+      "indexdef": "CREATE UNIQUE INDEX invoices_payment_id_key ON payments.invoices USING btree (payment_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "invoices",
+      "indexname": "invoices_pkey",
+      "indexdef": "CREATE UNIQUE INDEX invoices_pkey ON payments.invoices USING btree (invoice_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "notification_deliveries",
+      "indexname": "notification_deliveries_invoice_id_recipient_key",
+      "indexdef": "CREATE UNIQUE INDEX notification_deliveries_invoice_id_recipient_key ON payments.notification_deliveries USING btree (invoice_id, recipient)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "notification_deliveries",
+      "indexname": "notification_deliveries_pkey",
+      "indexdef": "CREATE UNIQUE INDEX notification_deliveries_pkey ON payments.notification_deliveries USING btree (delivery_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_occurred_at_idx",
+      "indexdef": "CREATE INDEX outbox_events_occurred_at_idx ON payments.outbox_events USING btree (occurred_at) WHERE (published_at IS NULL)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "outbox_events",
+      "indexname": "outbox_events_pkey",
+      "indexdef": "CREATE UNIQUE INDEX outbox_events_pkey ON payments.outbox_events USING btree (event_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payment_attempts",
+      "indexname": "payment_attempts_payment_id_attempt_key",
+      "indexdef": "CREATE UNIQUE INDEX payment_attempts_payment_id_attempt_key ON payments.payment_attempts USING btree (payment_id, attempt)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payment_attempts",
+      "indexname": "payment_attempts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX payment_attempts_pkey ON payments.payment_attempts USING btree (attempt_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payments",
+      "indexname": "commerce_payment_order",
+      "indexdef": "CREATE UNIQUE INDEX commerce_payment_order ON payments.payments USING btree (order_id) WHERE (owner_user_id IS NOT NULL)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payments",
+      "indexname": "payments_idempotency_key_key",
+      "indexdef": "CREATE UNIQUE INDEX payments_idempotency_key_key ON payments.payments USING btree (idempotency_key)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payments",
+      "indexname": "payments_order_idx",
+      "indexdef": "CREATE INDEX payments_order_idx ON payments.payments USING btree (order_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payments",
+      "indexname": "payments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX payments_pkey ON payments.payments USING btree (payment_id)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "payments",
+      "indexname": "payments_status_time_idx",
+      "indexdef": "CREATE INDEX payments_status_time_idx ON payments.payments USING btree (status, created_at)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "refunds",
+      "indexname": "refunds_payment_id_idempotency_key_key",
+      "indexdef": "CREATE UNIQUE INDEX refunds_payment_id_idempotency_key_key ON payments.refunds USING btree (payment_id, idempotency_key)"
+    },
+    {
+      "schemaname": "payments",
+      "tablename": "refunds",
+      "indexname": "refunds_pkey",
+      "indexdef": "CREATE UNIQUE INDEX refunds_pkey ON payments.refunds USING btree (refund_id)"
+    }
+  ],
+  "recent_orders": [
+    {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 17.02,
+        "Total Cost": 17.07,
+        "Plan Rows": 20,
+        "Plan Width": 30,
+        "Actual Startup Time": 0.125,
+        "Actual Total Time": 0.128,
+        "Actual Rows": 20,
+        "Actual Loops": 1,
+        "Shared Hit Blocks": 9,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 17.02,
+            "Total Cost": 17.77,
+            "Plan Rows": 301,
+            "Plan Width": 30,
+            "Actual Startup Time": 0.124,
+            "Actual Total Time": 0.126,
+            "Actual Rows": 20,
+            "Actual Loops": 1,
+            "Sort Key": [
+              "created_at DESC"
+            ],
+            "Sort Method": "top-N heapsort",
+            "Sort Space Used": 27,
+            "Sort Space Type": "Memory",
+            "Shared Hit Blocks": 9,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "orders",
+                "Alias": "orders",
+                "Startup Cost": 0.0,
+                "Total Cost": 9.01,
+                "Plan Rows": 301,
+                "Plan Width": 30,
+                "Actual Startup Time": 0.006,
+                "Actual Total Time": 0.039,
+                "Actual Rows": 304,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 6,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 0,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          }
+        ]
+      },
+      "Planning": {
+        "Shared Hit Blocks": 92,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.624,
+      "Triggers": [],
+      "Execution Time": 0.149
+    }
+  ],
+  "available_stock": [
+    {
+      "Plan": {
+        "Node Type": "Seq Scan",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Relation Name": "stock",
+        "Alias": "stock",
+        "Startup Cost": 0.0,
+        "Total Cost": 4.9,
+        "Plan Rows": 12,
+        "Plan Width": 4,
+        "Actual Startup Time": 0.012,
+        "Actual Total Time": 0.024,
+        "Actual Rows": 1,
+        "Actual Loops": 1,
+        "Filter": "((product_id = 1001) AND (warehouse_id = 1))",
+        "Rows Removed by Filter": 196,
+        "Shared Hit Blocks": 2,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning": {
+        "Shared Hit Blocks": 38,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.334,
+      "Triggers": [],
+      "Execution Time": 0.033
+    }
+  ],
+  "unpublished_outbox": [
+    {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.12,
+        "Total Cost": 4.87,
+        "Plan Rows": 1,
+        "Plan Width": 24,
+        "Actual Startup Time": 0.011,
+        "Actual Total Time": 0.012,
+        "Actual Rows": 0,
+        "Actual Loops": 1,
+        "Shared Hit Blocks": 1,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "outbox_events_occurred_at_idx",
+            "Relation Name": "outbox_events",
+            "Alias": "outbox_events",
+            "Startup Cost": 0.12,
+            "Total Cost": 4.87,
+            "Plan Rows": 1,
+            "Plan Width": 24,
+            "Actual Startup Time": 0.011,
+            "Actual Total Time": 0.011,
+            "Actual Rows": 0,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 1,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 0,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          }
+        ]
+      },
+      "Planning": {
+        "Shared Hit Blocks": 45,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.369,
+      "Triggers": [],
+      "Execution Time": 0.027
+    }
+  ],
+  "isolated_before_index": [
+    {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 15.13,
+        "Total Cost": 15.18,
+        "Plan Rows": 20,
+        "Plan Width": 16,
+        "Actual Startup Time": 0.124,
+        "Actual Total Time": 0.127,
+        "Actual Rows": 20,
+        "Actual Loops": 1,
+        "Shared Hit Blocks": 0,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 4,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Plans": [
+          {
+            "Node Type": "Sort",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Startup Cost": 15.13,
+            "Total Cost": 15.89,
+            "Plan Rows": 304,
+            "Plan Width": 16,
+            "Actual Startup Time": 0.123,
+            "Actual Total Time": 0.124,
+            "Actual Rows": 20,
+            "Actual Loops": 1,
+            "Sort Key": [
+              "created_at DESC"
+            ],
+            "Sort Method": "top-N heapsort",
+            "Sort Space Used": 26,
+            "Sort Space Type": "Memory",
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 4,
+            "Local Read Blocks": 0,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0,
+            "Plans": [
+              {
+                "Node Type": "Seq Scan",
+                "Parent Relationship": "Outer",
+                "Parallel Aware": false,
+                "Async Capable": false,
+                "Relation Name": "phase8_plan_orders",
+                "Alias": "phase8_plan_orders",
+                "Startup Cost": 0.0,
+                "Total Cost": 7.04,
+                "Plan Rows": 304,
+                "Plan Width": 16,
+                "Actual Startup Time": 0.016,
+                "Actual Total Time": 0.049,
+                "Actual Rows": 304,
+                "Actual Loops": 1,
+                "Shared Hit Blocks": 0,
+                "Shared Read Blocks": 0,
+                "Shared Dirtied Blocks": 0,
+                "Shared Written Blocks": 0,
+                "Local Hit Blocks": 4,
+                "Local Read Blocks": 0,
+                "Local Dirtied Blocks": 0,
+                "Local Written Blocks": 0,
+                "Temp Read Blocks": 0,
+                "Temp Written Blocks": 0
+              }
+            ]
+          }
+        ]
+      },
+      "Planning": {
+        "Shared Hit Blocks": 19,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 0,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.137,
+      "Triggers": [],
+      "Execution Time": 0.148
+    }
+  ],
+  "isolated_after_index": [
+    {
+      "Plan": {
+        "Node Type": "Limit",
+        "Parallel Aware": false,
+        "Async Capable": false,
+        "Startup Cost": 0.15,
+        "Total Cost": 1.59,
+        "Plan Rows": 20,
+        "Plan Width": 16,
+        "Actual Startup Time": 0.021,
+        "Actual Total Time": 0.027,
+        "Actual Rows": 20,
+        "Actual Loops": 1,
+        "Shared Hit Blocks": 0,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 10,
+        "Local Read Blocks": 1,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0,
+        "Plans": [
+          {
+            "Node Type": "Index Scan",
+            "Parent Relationship": "Outer",
+            "Parallel Aware": false,
+            "Async Capable": false,
+            "Scan Direction": "Forward",
+            "Index Name": "phase8_plan_orders_created_at_idx",
+            "Relation Name": "phase8_plan_orders",
+            "Alias": "phase8_plan_orders",
+            "Startup Cost": 0.15,
+            "Total Cost": 22.09,
+            "Plan Rows": 304,
+            "Plan Width": 16,
+            "Actual Startup Time": 0.02,
+            "Actual Total Time": 0.024,
+            "Actual Rows": 20,
+            "Actual Loops": 1,
+            "Shared Hit Blocks": 0,
+            "Shared Read Blocks": 0,
+            "Shared Dirtied Blocks": 0,
+            "Shared Written Blocks": 0,
+            "Local Hit Blocks": 10,
+            "Local Read Blocks": 1,
+            "Local Dirtied Blocks": 0,
+            "Local Written Blocks": 0,
+            "Temp Read Blocks": 0,
+            "Temp Written Blocks": 0
+          }
+        ]
+      },
+      "Planning": {
+        "Shared Hit Blocks": 8,
+        "Shared Read Blocks": 0,
+        "Shared Dirtied Blocks": 0,
+        "Shared Written Blocks": 0,
+        "Local Hit Blocks": 0,
+        "Local Read Blocks": 1,
+        "Local Dirtied Blocks": 0,
+        "Local Written Blocks": 0,
+        "Temp Read Blocks": 0,
+        "Temp Written Blocks": 0
+      },
+      "Planning Time": 0.14,
+      "Triggers": [],
+      "Execution Time": 0.045
+    }
+  ],
+  "mongo_indexes": [
+    {
+      "v": 2,
+      "key": {
+        "_id": 1
+      },
+      "name": "_id_"
+    },
+    {
+      "v": 2,
+      "key": {
+        "product_id": 1
+      },
+      "name": "product_id_unique",
+      "unique": true
+    },
+    {
+      "v": 2,
+      "key": {
+        "sku": 1
+      },
+      "name": "sku_unique",
+      "unique": true
+    },
+    {
+      "v": 2,
+      "key": {
+        "category": 1,
+        "brand": 1,
+        "active": 1
+      },
+      "name": "category_brand"
+    },
+    {
+      "v": 2,
+      "key": {
+        "source_version": 1,
+        "publication_version": 1
+      },
+      "name": "publication_version"
+    },
+    {
+      "v": 2,
+      "key": {
+        "active": 1,
+        "category": 1,
+        "brand": 1,
+        "price_cents": 1,
+        "product_id": 1
+      },
+      "name": "catalog_filters"
+    },
+    {
+      "v": 2,
+      "key": {
+        "_fts": "text",
+        "_ftsx": 1
+      },
+      "name": "catalog_search",
+      "weights": {
+        "brand": 1,
+        "description": 1,
+        "name": 1,
+        "sku": 1
+      },
+      "default_language": "english",
+      "language_override": "language",
+      "textIndexVersion": 3
+    }
+  ],
+  "mongo_query": {
+    "explainVersion": "1",
+    "queryPlanner": {
+      "namespace": "market_catalog.products",
+      "indexFilterSet": false,
+      "parsedQuery": {
+        "$and": [
+          {
+            "active": {
+              "$eq": true
+            }
+          },
+          {
+            "category": {
+              "$eq": "GPU"
+            }
+          }
+        ]
+      },
+      "queryHash": "B705EAE9",
+      "planCacheKey": "AC882B28",
+      "optimizationTimeMillis": 7,
+      "maxIndexedOrSolutionsReached": false,
+      "maxIndexedAndSolutionsReached": false,
+      "maxScansToExplodeReached": false,
+      "winningPlan": {
+        "stage": "LIMIT",
+        "limitAmount": 10,
+        "inputStage": {
+          "stage": "FETCH",
+          "inputStage": {
+            "stage": "IXSCAN",
+            "keyPattern": {
+              "active": 1,
+              "category": 1,
+              "brand": 1,
+              "price_cents": 1,
+              "product_id": 1
+            },
+            "indexName": "catalog_filters",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "active": [],
+              "category": [],
+              "brand": [],
+              "price_cents": [],
+              "product_id": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "active": [
+                "[true, true]"
+              ],
+              "category": [
+                "[\"GPU\", \"GPU\"]"
+              ],
+              "brand": [
+                "[MinKey, MaxKey]"
+              ],
+              "price_cents": [
+                "[MinKey, MaxKey]"
+              ],
+              "product_id": [
+                "[MinKey, MaxKey]"
+              ]
+            }
+          }
+        }
+      },
+      "rejectedPlans": [
+        {
+          "stage": "LIMIT",
+          "limitAmount": 10,
+          "inputStage": {
+            "stage": "FETCH",
+            "inputStage": {
+              "stage": "IXSCAN",
+              "keyPattern": {
+                "category": 1,
+                "brand": 1,
+                "active": 1
+              },
+              "indexName": "category_brand",
+              "isMultiKey": false,
+              "multiKeyPaths": {
+                "category": [],
+                "brand": [],
+                "active": []
+              },
+              "isUnique": false,
+              "isSparse": false,
+              "isPartial": false,
+              "indexVersion": 2,
+              "direction": "forward",
+              "indexBounds": {
+                "category": [
+                  "[\"GPU\", \"GPU\"]"
+                ],
+                "brand": [
+                  "[MinKey, MaxKey]"
+                ],
+                "active": [
+                  "[true, true]"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "executionStats": {
+      "executionSuccess": true,
+      "nReturned": 6,
+      "executionTimeMillis": 14,
+      "totalKeysExamined": 6,
+      "totalDocsExamined": 6,
+      "executionStages": {
+        "stage": "LIMIT",
+        "nReturned": 6,
+        "executionTimeMillisEstimate": 0,
+        "works": 8,
+        "advanced": 6,
+        "needTime": 0,
+        "needYield": 0,
+        "saveState": 0,
+        "restoreState": 0,
+        "isEOF": 1,
+        "limitAmount": 10,
+        "inputStage": {
+          "stage": "FETCH",
+          "nReturned": 6,
+          "executionTimeMillisEstimate": 0,
+          "works": 8,
+          "advanced": 6,
+          "needTime": 0,
+          "needYield": 0,
+          "saveState": 0,
+          "restoreState": 0,
+          "isEOF": 1,
+          "docsExamined": 6,
+          "alreadyHasObj": 0,
+          "inputStage": {
+            "stage": "IXSCAN",
+            "nReturned": 6,
+            "executionTimeMillisEstimate": 0,
+            "works": 7,
+            "advanced": 6,
+            "needTime": 0,
+            "needYield": 0,
+            "saveState": 0,
+            "restoreState": 0,
+            "isEOF": 1,
+            "keyPattern": {
+              "active": 1,
+              "category": 1,
+              "brand": 1,
+              "price_cents": 1,
+              "product_id": 1
+            },
+            "indexName": "catalog_filters",
+            "isMultiKey": false,
+            "multiKeyPaths": {
+              "active": [],
+              "category": [],
+              "brand": [],
+              "price_cents": [],
+              "product_id": []
+            },
+            "isUnique": false,
+            "isSparse": false,
+            "isPartial": false,
+            "indexVersion": 2,
+            "direction": "forward",
+            "indexBounds": {
+              "active": [
+                "[true, true]"
+              ],
+              "category": [
+                "[\"GPU\", \"GPU\"]"
+              ],
+              "brand": [
+                "[MinKey, MaxKey]"
+              ],
+              "price_cents": [
+                "[MinKey, MaxKey]"
+              ],
+              "product_id": [
+                "[MinKey, MaxKey]"
+              ]
+            },
+            "keysExamined": 6,
+            "seeks": 1,
+            "dupsTested": 0,
+            "dupsDropped": 0
+          }
+        }
+      }
+    },
+    "command": {
+      "find": "products",
+      "filter": {
+        "active": true,
+        "category": "GPU"
+      },
+      "limit": 10,
+      "$db": "market_catalog"
+    },
+    "serverInfo": {
+      "host": "557a71e8a88a",
+      "port": 27017,
+      "version": "7.0.45",
+      "gitVersion": "a52313e13ab55c9bddf7c3ff91dab286fa381796"
+    },
+    "serverParameters": {
+      "internalQueryFacetBufferSizeBytes": 104857600,
+      "internalQueryFacetMaxOutputDocSizeBytes": 104857600,
+      "internalLookupStageIntermediateDocumentMaxSizeBytes": 104857600,
+      "internalDocumentSourceGroupMaxMemoryBytes": 104857600,
+      "internalQueryMaxBlockingSortMemoryUsageBytes": 104857600,
+      "internalQueryProhibitBlockingMergeOnMongoS": 0,
+      "internalQueryMaxAddToSetBytes": 104857600,
+      "internalDocumentSourceSetWindowFieldsMaxMemoryBytes": 104857600,
+      "internalQueryFrameworkControl": "forceClassicEngine"
+    },
+    "ok": 1.0
+  }
+}

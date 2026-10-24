@@ -164,16 +164,19 @@ def products(period=PERIOD, category: str | None = None, page: int = Query(1, ge
 
 @app.get('/api/analytics/inventory', response_model=AnalyticsResponse)
 def inventory(warehouse_id: int | None = Query(None, gt=0), threshold: int | None = Query(None, ge=0, le=100000),
-              low_stock_only: bool = False, page: int = Query(1, ge=1, le=10000),
+              low_stock_only: bool = False, include_test: bool = False, page: int = Query(1, ge=1, le=10000),
               page_size: int = Query(20, ge=1, le=100), user=STAFF):
     doc, meta = load()
     limit = threshold if threshold is not None else int(env().get('ANALYTICS_LOW_STOCK_THRESHOLD', '5'))
-    data = [r for r in doc['tables']['inventory_snapshot'] if (warehouse_id is None or r['warehouse_id'] == warehouse_id)
+    data = [r for r in doc['tables']['inventory_snapshot']
+        if (include_test or doc.get('warehouse_classification', {}).get(str(r['warehouse_id']), 'OPERATIONAL') == 'OPERATIONAL')
+        and (warehouse_id is None or r['warehouse_id'] == warehouse_id)
         and (not low_stock_only or r['available'] <= limit)]
     data.sort(key=lambda r: (r['available'], r['product_id'], r['warehouse_id']))
     return response({'items': data[(page-1)*page_size:page*page_size], 'total': len(data), 'page': page,
         'page_size': page_size, 'threshold': limit,
-        'warehouses': sorted({(r['warehouse_id'], r['warehouse']) for r in doc['tables']['inventory_snapshot']})}, meta)
+        'warehouses': sorted({(r['warehouse_id'], r['warehouse']) for r in doc['tables']['inventory_snapshot']
+            if include_test or doc.get('warehouse_classification', {}).get(str(r['warehouse_id']), 'OPERATIONAL') == 'OPERATIONAL'})}, meta)
 
 
 @app.get('/api/analytics/customers', response_model=AnalyticsResponse)
@@ -211,3 +214,10 @@ def pipeline(user=STAFF):
     with connect('api') as conn:
         pipeline = conn.execute('SELECT * FROM pipeline_status WHERE singleton').fetchone()
     return response({'pipeline': pipeline, 'reconciliation': doc['reconciliation']}, meta)
+
+
+from market_analytics.metrics import register as register_metrics
+from market_analytics.operations import register as register_operations
+
+register_operations(app, staff)
+register_metrics()

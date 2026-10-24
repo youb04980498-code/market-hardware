@@ -1,0 +1,31 @@
+name: Local platform contracts and unit checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pip check
+      - run: python -m ruff check market_commerce market_catalog market_analytics tests data/seeds/phase2.py scripts/configure-operations.py scripts/backup-platform.py scripts/check-*.py
+      - run: python -m pytest tests/unit -q
+      - run: python scripts/check-contracts.py
+      - run: python scripts/check-secrets.py
+      - run: cp infrastructure/unopim/.env.example infrastructure/unopim/.env
+      - run: docker compose --env-file .env.example --profile '*' config --quiet
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run lint && npm run typecheck && npm test && npm run build && npm audit --audit-level=high
+        working-directory: frontend
+      # Stateful integration/recovery tests run locally with retained, initialized stores.
+      # This workflow does not pretend blank CI volumes contain the local platform.
