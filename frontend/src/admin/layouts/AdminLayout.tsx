@@ -86,6 +86,10 @@ export default function AdminLayout() {
           </small>
         </div>
         <div className="admin-secondary">
+          <Link to="/admin/3d-store">
+            <Box size={17} />
+            3D Store <small>Demo</small>
+          </Link>
           <Link to="/">
             <ArrowUpRight size={17} />
             Ouvrir la boutique
