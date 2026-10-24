@@ -1,5 +1,10 @@
 http:
   routers:
+    world:
+      rule: PathPrefix(`/api/world`)
+      entryPoints: [web]
+      service: world
+      middlewares: [gateway-rate]
     analytics:
       rule: PathPrefix(`/api/analytics`)
       entryPoints: [web]
@@ -46,6 +51,12 @@ http:
       service: catalogue
       middlewares: [health-path]
   services:
+    world:
+      loadBalancer:
+        responseForwarding:
+          flushInterval: -1ms
+        servers:
+          - url: http://world:8080
     analytics:
       loadBalancer:
         servers:

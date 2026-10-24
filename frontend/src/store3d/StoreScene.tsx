@@ -8,10 +8,13 @@ import {
 } from "@react-three/drei";
 import { Group, PCFShadowMap } from "three";
 import { Block, Hardware, Sign } from "./geometry";
+import { GraphicsLifecycle } from "./GraphicsLifecycle";
 import { departments, poseAt, shoppers } from "./simulation";
 import type { Department, Selection, Shopper } from "./simulation";
+import type { WorldOrder } from "./worldModel";
+import { canRepresentCheckout, stageColors } from "./worldModel";
 
-function Plant({
+export function Plant({
   position,
   scale = 1,
 }: {
@@ -52,7 +55,7 @@ function Plant({
   );
 }
 
-function DepartmentIsland({
+export function DepartmentIsland({
   item,
   selected,
   onSelect,
@@ -249,33 +252,43 @@ function ShoppingCart() {
   );
 }
 
-function Character({
+export function Character({
   shopper,
   time,
   paused,
   selected,
   onSelect,
+  transition = false,
+  label = "SIMULATED SHOPPER",
 }: {
   shopper: Shopper;
   time: React.RefObject<number>;
   paused: boolean;
   selected: boolean;
   onSelect: (s: Selection) => void;
+  transition?: boolean;
+  label?: string;
 }) {
   const body = useRef<Group>(null);
   const leftLeg = useRef<Group>(null);
   const rightLeg = useRef<Group>(null);
   const leftArm = useRef<Group>(null);
   const rightArm = useRef<Group>(null);
-  const start = poseAt(shopper, 0);
+  const start = useRef(poseAt(shopper, 0)).current;
   useFrame((_, delta) => {
     if (!body.current || paused) return;
     const pose = poseAt(shopper, time.current);
-    body.current.position.set(
-      pose.x,
-      pose.moving ? Math.sin(time.current * 8) * 0.016 : 0,
-      pose.z,
-    );
+    if (transition) {
+      body.current.position.x +=
+        (pose.x - body.current.position.x) * Math.min(delta * 3, 1);
+      body.current.position.z +=
+        (pose.z - body.current.position.z) * Math.min(delta * 3, 1);
+    } else
+      body.current.position.set(
+        pose.x,
+        pose.moving ? Math.sin(time.current * 8) * 0.016 : 0,
+        pose.z,
+      );
     const difference = Math.atan2(
       Math.sin(pose.angle - body.current.rotation.y),
       Math.cos(pose.angle - body.current.rotation.y),
@@ -391,7 +404,7 @@ function Character({
         <Billboard position={[0, 1.9, 0]}>
           <Sign
             text={shopper.name.toUpperCase()}
-            sub="SIMULATED SHOPPER"
+            sub={label}
             width={1.6}
             height={0.42}
             color="#28493e"
@@ -403,9 +416,17 @@ function Character({
   );
 }
 
-function Register({ z, number }: { z: number; number: string }) {
+export function Register({
+  z,
+  number,
+  x = 7.2,
+}: {
+  z: number;
+  number: string;
+  x?: number;
+}) {
   return (
-    <group position={[7.2, 0, z]}>
+    <group position={[x, 0, z]}>
       <RoundedBox
         args={[1.7, 0.95, 0.9]}
         position={[0, 0.51, 0]}
@@ -481,7 +502,9 @@ function Register({ z, number }: { z: number; number: string }) {
   );
 }
 
-function Interior() {
+export function Interior({
+  withCheckout = true,
+}: { withCheckout?: boolean } = {}) {
   return (
     <group>
       <RoundedBox
@@ -606,8 +629,12 @@ function Interior() {
       <group position={[6.8, 1.5, -5.6]}>
         <Hardware kind="builds" />
       </group>
-      <Register z={-0.3} number="01" />
-      <Register z={-3.9} number="02" />
+      {withCheckout && (
+        <>
+          <Register z={-0.3} number="01" />
+          <Register z={-3.9} number="02" />
+        </>
+      )}
       <Block
         size={[18.5, 0.12, 1.8]}
         position={[0, -0.07, 7.15]}
@@ -686,7 +713,13 @@ function Interior() {
   );
 }
 
-function CameraRig({ reset, onReady }: { reset: number; onReady: () => void }) {
+export function CameraRig({
+  reset,
+  onReady,
+}: {
+  reset: number;
+  onReady: () => void;
+}) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const { camera, size, invalidate } = useThree();
   useEffect(() => {
@@ -699,7 +732,7 @@ function CameraRig({ reset, onReady }: { reset: number; onReady: () => void }) {
   }, [reset, size.width, size.height, camera, invalidate]);
   useEffect(() => {
     onReady();
-  }, [onReady]);
+  }, [onReady, reset]);
   return (
     <OrbitControls
       ref={controls}
@@ -719,10 +752,14 @@ function World({
   paused,
   selection,
   onSelect,
+  businessOrders,
+  onOrderSelect,
 }: {
   paused: boolean;
   selection: Selection;
   onSelect: (s: Selection) => void;
+  businessOrders?: WorldOrder[];
+  onOrderSelect?: (id: number) => void;
 }) {
   const time = useRef(0);
   useFrame((_, delta) => {
@@ -767,18 +804,57 @@ function World({
           onSelect={onSelect}
         />
       ))}
-      {shoppers.map((shopper) => (
-        <Character
-          key={shopper.id}
-          shopper={shopper}
-          time={time}
-          paused={paused}
-          selected={
-            selection?.kind === "customer" && selection.id === shopper.id
-          }
-          onSelect={onSelect}
-        />
-      ))}
+      {businessOrders
+        ?.filter((o) => canRepresentCheckout(o.status))
+        .slice(0, 8)
+        .map((order, i) => {
+          const leaving = ["PAID", "CANCELLED", "REFUNDED"].includes(
+            order.status,
+          );
+          const shopper: Shopper = {
+            id: String(order.order_id),
+            name: `Order #${order.order_id}`,
+            activity: "Checkout Queue",
+            color: stageColors[order.status] ?? "#82968d",
+            skin: "#c4b29a",
+            hair: "#53605c",
+            speed: 0,
+            phase: 0,
+            path: [
+              [
+                leaving ? 5.4 + (i % 3) * 0.8 : 7.2,
+                leaving ? 5.1 : 1.3 + (i % 3) * 1.15,
+              ],
+            ],
+          };
+          return (
+            <Character
+              key={`order-${order.order_id}`}
+              shopper={shopper}
+              time={time}
+              paused={paused}
+              selected={
+                selection?.kind === "customer" && selection.id === shopper.id
+              }
+              label={`${order.status} / RECORDED ORDER`}
+              transition
+              onSelect={() => onOrderSelect?.(order.order_id)}
+            />
+          );
+        })}
+      {businessOrders === undefined &&
+        shoppers.map((shopper) => (
+          <Character
+            key={shopper.id}
+            shopper={shopper}
+            time={time}
+            paused={paused}
+            selected={
+              selection?.kind === "customer" && selection.id === shopper.id
+            }
+            onSelect={onSelect}
+          />
+        ))}
     </>
   );
 }
@@ -790,6 +866,8 @@ export default function StoreScene({
   onSelect,
   onReady,
   onLost,
+  businessOrders,
+  onOrderSelect,
 }: {
   paused: boolean;
   reset: number;
@@ -797,6 +875,8 @@ export default function StoreScene({
   onSelect: (s: Selection) => void;
   onReady: () => void;
   onLost: () => void;
+  businessOrders?: WorldOrder[];
+  onOrderSelect?: (id: number) => void;
 }) {
   return (
     <Canvas
@@ -808,9 +888,6 @@ export default function StoreScene({
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         gl.setClearColor("#e1e6de");
-        gl.domElement.addEventListener("webglcontextlost", onLost, {
-          once: true,
-        });
       }}
       onPointerMissed={() => onSelect(null)}
       fallback={
@@ -820,10 +897,17 @@ export default function StoreScene({
         </div>
       }
     >
+      <GraphicsLifecycle onLost={onLost} />
       <Instances limit={1500} castShadow receiveShadow frustumCulled={false}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial roughness={0.72} />
-        <World paused={paused} selection={selection} onSelect={onSelect} />
+        <World
+          paused={paused}
+          selection={selection}
+          onSelect={onSelect}
+          businessOrders={businessOrders}
+          onOrderSelect={onOrderSelect}
+        />
       </Instances>
       <CameraRig reset={reset} onReady={onReady} />
     </Canvas>

@@ -6,6 +6,7 @@ The [V3 requirements](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md) define the 
 
 ## Features
 
+- On `3d-test-branch`: [one continuous pastel 3D city](docs/3d-world.md) with Commercial, Industrial, Logistics and Business districts, plus the [original storefront demo](frontend/README-3D.md). Desktop browsers only; live recorded state and optional DEMO pedestrians/vehicles are explicitly distinguished.
 - UnoPim authoring, explicit approval and versioned publication to MongoDB, with validated compatibility relationships in Neo4j.
 - React storefront and role-protected administration: catalogue, orders, inventory, analytics, observability and alerts.
 - Auth, Orders, Inventory and Payments REST services; catalogue GraphQL; durable checkout Saga, stock reservations, refunds and transactional outboxes.
@@ -157,7 +158,7 @@ The `verify-data`, `verify-catalog`, `verify-commerce`, `verify-frontend` and `v
 ## Safe stop and restart
 
 ```powershell
-docker compose --profile catalog --profile commerce --profile streaming --profile analytics --profile frontend --profile monitoring stop -t 60
+docker compose --profile catalog --profile commerce --profile streaming --profile analytics --profile frontend --profile monitoring --profile world stop -t 60
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-platform.ps1
 ```
 

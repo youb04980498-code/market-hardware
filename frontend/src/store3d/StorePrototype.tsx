@@ -30,7 +30,7 @@ import type { Selection } from "./simulation";
 import "./store3d.css";
 const StoreScene = lazy(() => import("./StoreScene"));
 
-class SceneBoundary extends Component<
+export class SceneBoundary extends Component<
   { children: ReactNode; retry: () => void },
   { failed: boolean }
 > {
@@ -118,6 +118,9 @@ export default function StorePrototype() {
           <span />
           DEMO / SIMULATION
         </span>
+        <Link to="/admin/3d-world?view=overview" className="mini-real-store">
+          Explore live 3D world <ArrowUpRight size={15} />
+        </Link>
         <Link to="/" className="mini-real-store">
           Real storefront <ArrowUpRight size={15} />
         </Link>

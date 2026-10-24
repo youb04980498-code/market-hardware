@@ -26,6 +26,7 @@ const Inventory = lazy(() => import("./admin/pages/Inventory"));
 const Observability = lazy(() => import("./admin/pages/Observability"));
 const Analytics = lazy(() => import("./admin/pages/Analytics"));
 const StorePrototype = lazy(() => import("./store3d/StorePrototype"));
+const WorldExplorer = lazy(() => import("./store3d/WorldExplorer"));
 export default function App() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -36,6 +37,14 @@ export default function App() {
   return (
     <Suspense fallback={<State loading />}>
       <Routes>
+        <Route
+          path="admin/3d-world"
+          element={
+            <Protected admin>
+              <WorldExplorer />
+            </Protected>
+          }
+        />
         <Route
           path="admin/3d-store"
           element={

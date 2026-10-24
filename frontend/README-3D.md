@@ -1,5 +1,7 @@
 # Miniature electronics store — prototype 01
 
+**Looking for the connected miniature city? Open http://127.0.0.1:5173/admin/3d-world?view=overview** (or http://localhost:8080/admin/3d-world with the Docker frontend). Its Commercial, Industrial, Logistics and Business districts share one ground plane. See [README-WORLD.md](README-WORLD.md) for startup steps. This document describes the original storefront-only DEMO, which remains at `/admin/3d-store`.
+
 Branch: **`3d-test-branch`**. Route: **`/admin/3d-store`**. This experiment preserves the existing storefront/admin routes and uses the existing staff/admin authentication guard. A new **3D Store · Demo** link appears below the main admin navigation.
 
 ## Launch locally

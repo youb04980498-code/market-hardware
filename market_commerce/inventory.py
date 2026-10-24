@@ -1,7 +1,7 @@
 from datetime import timedelta
 from uuid import UUID
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Query
 from pydantic import BaseModel, ConfigDict, Field
 
 from market_commerce.common import (
@@ -260,3 +260,18 @@ def warehouse_summary(include_test: bool = False, user=USER):
             FROM inventory.warehouses w LEFT JOIN inventory.stock s USING(warehouse_id)
             WHERE (%s OR w.classification='OPERATIONAL') GROUP BY w.warehouse_id ORDER BY w.warehouse_id""", (include_test,)).fetchall(),
             'capacity_unit': 'physical_item'}
+
+
+@app.get('/api/inventory/warehouses/{warehouse_id}/stock')
+def warehouse_stock(warehouse_id: int, page: int = Query(1, ge=1, le=10000),
+                    page_size: int = Query(100, ge=1, le=100), user=USER):
+    """Schema-owned staff read; physical shelf locations are deliberately not invented."""
+    require_staff(user)
+    with transaction('inventory') as conn:
+        if not conn.execute('SELECT 1 FROM inventory.warehouses WHERE warehouse_id=%s', (warehouse_id,)).fetchone():
+            fail(404, 'WAREHOUSE_NOT_FOUND', 'Warehouse not found')
+        total = conn.execute('SELECT count(*) AS n FROM inventory.stock WHERE warehouse_id=%s', (warehouse_id,)).fetchone()['n']
+        rows = conn.execute('''SELECT product_id,warehouse_id,quantity,reserved_quantity,
+            quantity-reserved_quantity AS available FROM inventory.stock WHERE warehouse_id=%s
+            ORDER BY product_id LIMIT %s OFFSET %s''', (warehouse_id, page_size, (page-1)*page_size)).fetchall()
+    return {'items': rows, 'total': total, 'page': page, 'page_size': page_size, 'placement': 'UNAVAILABLE'}

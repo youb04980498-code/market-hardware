@@ -160,6 +160,18 @@ def public_pay(body: Pay, request: Request, response: Response, user=USER):
     return public_payment(result)
 
 
+@app.get('/api/payments/states')
+def payment_states(order_ids: str, user=USER):
+    require_staff(user)
+    parts = order_ids.split(',')
+    if not 1 <= len(parts) <= 100 or any(not p.isascii() or not p.isdecimal() or len(p)>18 or int(p)<1 for p in parts):
+        fail(422, 'INVALID_ORDER_IDS', 'Provide at most 100 positive order IDs')
+    with transaction('payments') as conn:
+        rows = conn.execute('''SELECT payment_id,order_id,status,amount_cents,currency FROM payments.payments
+            WHERE order_id=ANY(%s) ORDER BY order_id,payment_id''', (list({int(p) for p in parts}),)).fetchall()
+    return {'items': rows, 'provider': 'SIMULATED'}
+
+
 @app.get('/api/payments/{payment_id}')
 def get_payment(payment_id: int, user=USER):
     with transaction('payments') as conn:

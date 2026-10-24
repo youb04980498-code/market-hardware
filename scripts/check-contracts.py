@@ -11,7 +11,8 @@ def main(write=False):
     from market_analytics import api
     from market_catalog import api as catalog
     from market_commerce import auth, inventory, orders, payments
-    for name, module in [('auth', auth), ('inventory', inventory), ('orders', orders), ('payments', payments), ('analytics', api), ('catalog-operations', catalog)]:
+    from market_world import api as world
+    for name, module in [('auth', auth), ('inventory', inventory), ('orders', orders), ('payments', payments), ('analytics', api), ('catalog-operations', catalog), ('world', world)]:
         path = ROOT / 'data/contracts/openapi' / (name + '.v1.json')
         generated = module.app.openapi()
         if write:
