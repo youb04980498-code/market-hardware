@@ -1,156 +1,191 @@
-# Market Hardware
+# Market Hardware V3
 
-Plateforme de pilotage d'un e-commerce de matériel informatique : commandes, catalogue, stock, paiements simulés, analytique et observabilité.
+A local e-commerce and data engineering platform for computer hardware. GitHub stores the code, contracts and synthetic seed data; Docker runs the application and databases on your machine.
 
-## État du dépôt
+The [V3 requirements](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md) define the target. See the [compliance matrix](docs/phase8-compliance-matrix.md) for implemented and outstanding requirements. AI/PC Builder (Phase 7), automatic invoice PDFs and confirmation-email workers remain unfinished. Payments are simulated; this deployment uses local loopback HTTP.
 
-Le dépôt suit le scaffold V3. L'infrastructure locale comprend PostgreSQL 16, MongoDB 7, Neo4j et UnoPim avec sa base dédiée, Redis, Elasticsearch, queue worker, scheduler et Mailpit. Les services de données utilisent des volumes persistants. Les vérifications de santé sont obligatoires pour PostgreSQL, MongoDB, Neo4j et tous les services UnoPim. Redis et MinIO du socle initial restent disponibles. Kafka est optionnel sous les profils `kafka`/`streaming` et publie les événements transactionnels quand il est activé ; Prometheus et Grafana utilisent `monitoring`.
+## Features
 
-Les sources de données synthétiques sont suivies dans Git sous `data/`. Auth, Orders, Inventory, Payments, le catalogue GraphQL, la synchronisation PIM, le publisher outbox et l'application React boutique/administration sont implémentés. La Phase 6 ajoute Analytics, Spark Structured Streaming, Delta sur MinIO et les rapports trimestriels. L'IA et les workers de facturation restent à implémenter. Les répertoires réservés sont suivis avec `.gitkeep` ; leur présence seule ne signifie pas qu'une application est développée.
+- UnoPim authoring, explicit approval and versioned publication to MongoDB, with validated compatibility relationships in Neo4j.
+- React storefront and role-protected administration: catalogue, orders, inventory, analytics, observability and alerts.
+- Auth, Orders, Inventory and Payments REST services; catalogue GraphQL; durable checkout Saga, stock reservations, refunds and transactional outboxes.
+- Kafka publication after broker acknowledgement; Spark Structured Streaming, Delta Lake on MinIO, analytics serving data and quarterly batch reports.
+- Persistent business alerts, warehouse utilization, Prometheus/Grafana monitoring, OpenTelemetry/Jaeger tracing and technical-log retention.
+- Tracked seed data, additive SQL migrations and backup/recovery tooling. Existing-installation test results do not prove a fresh-clone installation works.
 
-La référence fonctionnelle et technique est le [cahier des charges V3](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V3.md). Ses exigences MUST et critères AC-01 à AC-27 définissent la cible à implémenter et à valider. L'[architecture V1](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md) est conservée comme historique ; la V3 prévaut en cas de divergence. Les conventions de développement figurent dans [AGENTS.md](AGENTS.md).
+## Architecture
 
-La Phase 8 ajoute la supervision, les traces distribuées, les alertes persistantes, les capacités des entrepôts et la purge hebdomadaire des logs techniques âgés de plus de 7 jours. Ollama/Qwen et les workers métier de facturation/notification restent à implémenter ; la Phase 7 est reportée. Le frontend dispose du profil Compose `frontend` ; Spark utilise le profil optionnel analytics ; aucun service IA n'est démarré.
-
-## Boutique et administration — Phase 5
-
-Après le démarrage du backend commerce, lancer :
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-frontend.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-frontend.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-frontend.ps1
+```mermaid
+flowchart LR
+  Browser --> Gateway[Traefik]
+  Gateway --> Web[React / Nginx]
+  Gateway --> Commerce[Auth / Orders / Inventory / Payments]
+  Gateway --> Catalog[Catalogue GraphQL]
+  Gateway --> Analytics[Analytics API]
+  Commerce --> PG[(PostgreSQL market_db)]
+  PIM[UnoPim + dedicated PostgreSQL / Redis / Elasticsearch] --> Sync[Product-sync: approved revisions]
+  Sync --> Mongo[(MongoDB)]
+  Sync --> Neo[(Neo4j)]
+  Catalog --> Mongo
+  Catalog --> Neo
+  Commerce -->|HTTP catalogue reads| Catalog
+  PG -->|schema-owned outboxes| Publisher[Outbox publisher]
+  Publisher --> Kafka
+  Kafka --> Spark[Spark worker]
+  PG -->|restricted read-only export| Spark
+  Catalog -->|published product reads| Spark
+  Spark --> Lake[(MinIO / Delta)]
+  Spark --> Serving[(PostgreSQL market_analytics)]
+  Serving --> Analytics
+  APIs[Instrumented APIs] --> OTel[OTel Collector / Jaeger]
+  Metrics[API metrics / exporters / gateway] --> Prom[Prometheus / Alertmanager]
+  Prom --> Grafana
 ```
 
-La boutique est accessible sur http://localhost:8080/ et l'administration sur http://localhost:8080/admin. Utiliser les comptes DEV_CUSTOMER/DEV_ADMIN du fichier `.env` local ; ne jamais intégrer leurs valeurs au bundle frontend. Le jeton d'accès reste en mémoire et le jeton de renouvellement reste dans un cookie `HttpOnly` strict, permettant de restaurer la session après rechargement sans exposer ce secret à JavaScript. Voir la [documentation Phase 5](docs/phase5-frontend.md) pour les sources MIT adaptées, les routes, contrats, tests et limitations.
+Business schemas have separate logins; cross-service operations use HTTP. Analytics source export is an explicit restricted read-only exception documented in the [ADRs](docs/ADR/). UnoPim does not write directly to commerce tables. Monitoring is separate from the business data flow.
 
-Le configurateur PC sous budget est obligatoire : un solver Python déterministe produit une BOM complète, vérifie les compatibilités, les prix et le stock via les sources autorisées, puis recalcule au checkout. Le LLM interprète et explique les résultats ; le solver porte les contraintes et le calcul. Les nouveaux critères AC-23 à AC-27 couvrent cette fonction. La [V2](docs/MARKET_HARDWARE_CAHIER_DES_CHARGES_V2.md) est conservée pour historique.
+## Technology stack
 
-## Démarrage local sous Windows
+| Area | Implementation |
+| --- | --- |
+| UI / gateway | React, TypeScript, Vite, Nginx, Traefik 3.5 |
+| APIs / authentication | Python 3.12, FastAPI, Strawberry GraphQL, Argon2id, JWT |
+| Operational stores | PostgreSQL 16, MongoDB 7, Neo4j 5.26 Community |
+| PIM | Digest-pinned UnoPim, dedicated PostgreSQL, Redis, Elasticsearch, Mailpit |
+| Events | Apache Kafka 4.1.2, KRaft, transactional outbox |
+| Analytics | Spark 3.5.7, Delta Spark 3.3.2, MinIO S3, separate analytics database |
+| Operations | Prometheus, Grafana, Alertmanager, OpenTelemetry Collector, Jaeger, exporters |
+| Initialization | PowerShell, Python/psycopg, checksum-verified SQL migrations, CSV/JSON/JSONL fixtures |
 
-Prérequis : Docker Desktop avec conteneurs Linux, Git, Python 3.12, Node.js LTS et JDK 17.
+Exact inputs are in [Compose](docker-compose.yml), its [UnoPim include](infrastructure/unopim/compose.yaml), Dockerfiles and dependency locks. Some base image tags and host development dependencies remain floating; installation is not guaranteed byte-for-byte identical over time.
+
+## Prerequisites
+
+- Windows, PowerShell 5.1+, Git and **Python 3.12** (`py -3.12` or `python`).
+- Docker Desktop running **Linux containers** with its WSL2 backend and virtualization configured. Compose must support `include` (2.20+).
+- Planning estimate for the full stack: **16 GB host RAM, preferably 24-32 GB; 10-12 GB available to Docker when possible; 4 CPU cores; 40 GB free disk** before data/backups grow. These are recommendations, not a measured cold-start minimum. Spark has a 2.5 GB container limit; Neo4j and Elasticsearch also consume JVM memory.
+- Internet access for images, Python/npm packages, the pinned MinIO source build and Spark JARs. First builds can take considerable time.
+- Host Node.js/npm is needed only for frontend development/browser tests; host Java 17 only for host Spark execution. The documented Docker startup supplies Node, Java, PHP and Go inside builds/containers.
+- Free loopback ports: `3000, 5432, 6379, 7474, 7687, 8000, 8025, 8080, 9000, 9001, 9090, 9092, 9093, 16686, 27017`.
+
+## Quick Start: first installation
+
+Read [Cold Start](docs/COLD_START.md) before running these stages. Copying `.env.example` alone is insufficient: it contains placeholders and blank credentials generated by later provisioning.
+
+On a machine with **no Market Hardware containers or volumes**:
 
 ```powershell
-cd C:\market-hardware
-# Crée .venv et installe les dépendances Python ; génère .env s'il est absent.
+git clone https://github.com/youb04980498-code/market-hardware.git
+cd market-hardware
+Copy-Item .env.example .env
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\prepare-cold-start.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install-market.ps1 -SkipPackages -SkipContainers
-# Démarre l'infrastructure locale, attend la santé des conteneurs puis vérifie les connexions.
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
-```
-
-Pour installer aussi les outils Windows sur une nouvelle machine, omettre `-SkipPackages`. Le premier démarrage peut compiler MinIO depuis sa révision officielle épinglée ; l'image locale est ensuite réutilisée.
-
-Ce dépôt reprend le nom Compose `market-hardware` et les volumes du dossier `C:\market-local-setup`. Sur cette machine, le fichier `.env` local existant a été repris et reste ignoré par Git. Il ne faut pas générer de nouveaux identifiants pour des volumes déjà initialisés.
-
-Pour activer la supervision ou arrêter les services :
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1 -WithMonitoring
-# Kafka seulement lors de la future phase événementielle :
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-market.ps1 -WithKafka
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\stop-market.ps1
-```
-
-L'arrêt conserve les volumes. Le démarrage par défaut arrête un éventuel Kafka existant sans supprimer son volume. Les migrations et imports Phase 2 sont exécutés explicitement avec `scripts/initialize-data.ps1`, séparément du démarrage des conteneurs. GitHub conserve le code, les fixtures et la documentation ; l'exécution, les secrets et les bases restent locaux.
-
-## Accès à l'infrastructure
-
-Neo4j et la pile UnoPim sont maintenant déclarés dans le Compose racine. UnoPim utilise sa propre base PostgreSQL, Redis, Elasticsearch, workers et Mailpit. La publication approuvée vers MongoDB/Neo4j est implémentée dans la Phase 3. Les identifiants administrateur générés sont conservés localement dans `.local/unopim-admin-credentials.txt` (ignoré par Git).
-
-| Service | Adresse locale |
-| --- | --- |
-| PostgreSQL | `127.0.0.1:5432`, base `market_db` |
-| MongoDB | `127.0.0.1:27017`, catalogue dans `market_catalog` |
-| Kafka, clients Windows (profil kafka) | `127.0.0.1:9092` |
-| Kafka, autres conteneurs (profil kafka) | `kafka:19092` |
-| Redis | `127.0.0.1:6379` |
-| Neo4j Browser / Bolt | <http://localhost:7474> / `127.0.0.1:7687` |
-| UnoPim | <http://localhost:8000/admin> |
-| Mailpit | <http://localhost:8025> |
-| MinIO S3 | <http://127.0.0.1:9000> |
-| Console MinIO | <http://127.0.0.1:9001> |
-| Prometheus, profil monitoring | <http://127.0.0.1:9090> |
-| Grafana, profil monitoring | <http://127.0.0.1:3000> |
-
-Les mots de passe sont dans `.env`, jamais dans Git. Les ports sont liés à l'interface locale pour le développement.
-
-## Organisation
-
-Le scaffold suit les répertoires du §16 V3. Le fichier Compose racine reste le point d'entrée ; `infrastructure/compose/README.md` documente cette convention. Les fixtures catalogue gardent leur chemin `data/catalog/` et `data/mongodb/` réserve les schémas/imports MongoDB.
-
-| Répertoire | Responsabilité |
-| --- | --- |
-| `data/contracts/` | Contrats OpenAPI, GraphQL et événements Kafka |
-| `data/` | Fixtures, schémas PostgreSQL/MongoDB, contrats et emplacement seeds |
-| `services/` | Auth, Orders, Inventory, Payments et Catalog GraphQL ; analytics et ai-assistant réservés |
-| `workers/` | Product-sync et outbox-publisher ; invoice, notifications et log-retention réservés |
-| `pipelines/` | Placeholders spark-streaming, spark-batch-quarterly, qualité et lakehouse |
-| `frontend/src/` | Une application React : storefront, admin, clients API et composants partagés ; anciens répertoires features conservés |
-| `infrastructure/` | Traefik, Prometheus, Grafana, OpenTelemetry et build MinIO |
-| `tests/` | Tests unitaires et intégration ; contrats, e2e et acceptance réservés |
-| `.github/workflows/` | Emplacement réservé aux futurs workflows |
-| `docs/` | Architecture, ADR, dictionnaire, API et validation de démonstration |
-| `scripts/` | Installation, démarrage, arrêt et vérification Windows |
-
-## Vérifications du socle
-
-```powershell
-docker compose --env-file .env -f docker-compose.yml config --quiet
-docker compose -f docker-compose.yml ps
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
-.\.venv\Scripts\python.exe -m pip check
-```
-
-Le vérificateur échoue avec un code non nul si un service requis est absent, arrêté, sans santé `healthy`, sans son volume attendu ou inaccessible. Il exécute une requête PostgreSQL authentifiée, un ping MongoDB authentifié, une requête Neo4j authentifiée et vérifie `/up` et la page de connexion UnoPim. Ces contrôles portent sur le socle technique ; les parcours métier et pipelines restent à valider séparément dans [le plan de validation](docs/demo-validation.md).
-
-## Phase 2 : bases et données
-
-Les migrations PostgreSQL, la validation MongoDB et le graphe Neo4j sont implémentés et chargés depuis `data/`. Les identifiants locaux sont lus et générés directement dans `.env`, ignoré par Git.
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\initialize-data.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-data.ps1
-```
-
-Voir [les mappings, contrôles et limites Phase 2](docs/phase2-database-setup.md).
-
-## Phase 3 : PIM et catalogue GraphQL
-
-UnoPim gère maintenant les huit familles de composants et leurs attributs. Le worker publie uniquement les révisions approuvées dans MongoDB et Neo4j, avec contrôle des versions, journal durable et reprise sur erreur. Le catalogue GraphQL Strawberry est disponible via Traefik à <http://localhost:8080/graphql>.
-
-```powershell
+.\.venv\Scripts\python.exe data/seeds/phase2.py all
+if ($LASTEXITCODE -ne 0) { throw 'Database initialization failed' }
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-catalog.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-catalog.ps1
-```
-
-[Configuration, mapping, approbation et limites Phase 3](docs/phase3-catalogue.md). Les tests conservent un produit de vérification inactif et avancent les versions de publication sans modifier les fixtures sources.
-
-## Phase 4 : backend transactionnel
-
-Auth, Inventory, Orders et Payments sont exposés via Traefik sous `/api/auth`, `/api/inventory`, `/api/orders` et `/api/payments`. Le checkout utilise une Saga persistée, les paiements sont simulés et le publisher confirme la publication des outboxes uniquement après acquittement Kafka. GraphQL et UnoPim restent opérationnels.
-
-```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-commerce.ps1 -WithKafka
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-commerce.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-commerce.ps1
+foreach ($topic in @('market.auth.v1','market.orders.v1','market.inventory.v1','market.payments.v1')) {
+    docker compose exec -T kafka /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --create --if-not-exists --topic $topic --partitions 1 --replication-factor 1
+    if ($LASTEXITCODE -ne 0) { throw "Topic initialization failed: $topic" }
+}
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-analytics.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-platform.ps1
 ```
 
-Sans `-WithKafka`, les événements restent durablement en attente. Les identifiants de développement sont générés directement dans `.env`, ignoré par Git ; les comptes fixtures restent désactivés. [Architecture, endpoints, sécurité, reprise et limites](docs/phase4-commerce.md).
+Run stages separately and stop at the first error; interactive PowerShell does not automatically stop after a failed native command. Create a human UnoPim admin separately using the interactive command in [Cold Start](docs/COLD_START.md#5-create-a-human-pim-administrator). Generated commerce credentials are saved directly in ignored `.env`.
 
-## Analytics — Phase 6
+**This complete cold-start sequence has not been executed against an empty isolated stack.** Existing-stack readiness is separate evidence. See [validation status](docs/COLD_START.md#validation-status-and-known-limitations).
 
-La page http://localhost:8080/admin/analytics expose les données matérialisées avec contrôle des rôles et fraîcheur explicite. Démarrer avec `scripts/start-analytics.ps1`, vérifier avec `scripts/verify-analytics.ps1`, tester les reprises avec `scripts/test-analytics.ps1 -WithRecovery`, et arrêter avec `scripts/stop-analytics.ps1`. Le backfill est en lecture seule ; les checkpoints et données Delta restent dans MinIO. Voir [architecture, commandes et limites](docs/phase6-analytics.md) et [résultats mesurés](docs/phase6-execution.md).
+## Start an existing installation
 
-## Operations and compliance ? Phase 8
-
-The monitoring profile now provisions Prometheus, Grafana, Alertmanager, OpenTelemetry Collector/Jaeger and restricted database/Kafka exporters. The French admin UI exposes real monitoring, persistent business alerts and physical warehouse utilization. Phase 7 remains postponed.
+Keep the original root `.env`, `infrastructure/unopim/.env`, `.venv` and volumes:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-platform.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-platform.ps1
-.\.venv\Scripts\python.exe scripts/backup-platform.py --restore-isolated
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-platform.ps1
 ```
 
-These commands preserve existing databases, offsets and checkpoints and do not reseed. See [compliance](docs/phase8-compliance-matrix.md), [observability](docs/phase8-observability.md), [alerts](docs/phase8-alerting.md), [logistics](docs/phase8-logistics.md), [resilience](docs/phase8-resilience.md), [recovery](docs/phase8-backup-recovery.md), [jury demonstrations](docs/phase8-jury-demo.md) and [actual verification results](docs/phase8-final-report.md). Backups and service credentials remain local.
+This applies additive operations/analytics setup and starts all implemented profiles without reseeding business data. It assumes database initialization, PIM integration, service accounts and `KAFKA_ENABLED=1` already exist. Never copy the example over an existing `.env`, regenerate passwords for populated volumes or routinely reseed during restart.
+
+## Local access and accounts
+
+| Interface | Address | Account source |
+| --- | --- | --- |
+| Storefront / administration | [Storefront](http://localhost:8080/) / [Admin](http://localhost:8080/admin) | `DEV_CUSTOMER_*` / `DEV_ADMIN_*` in root `.env` |
+| UnoPim | [PIM admin](http://localhost:8000/admin) | Human admin created interactively; integration robot is separate |
+| REST Swagger / OpenAPI | `http://localhost:8080/api/<service>/docs` / `openapi.json` | Services: `auth`, `orders`, `inventory`, `payments`, `analytics` |
+| Catalogue | [GraphQL](http://localhost:8080/graphql) | Published reads; catalogue operations require staff/admin |
+| Grafana | [Grafana](http://localhost:3000) | `admin`, `GRAFANA_ADMIN_PASSWORD` |
+| Prometheus / Alertmanager | [Prometheus](http://localhost:9090) / [Alertmanager](http://localhost:9093) | Local development interfaces |
+| Traces | [Jaeger](http://localhost:16686) | Local development interface |
+| Neo4j | [Browser](http://localhost:7474), Bolt `127.0.0.1:7687` | `neo4j`, `NEO4J_PASSWORD` |
+| MinIO | [Console](http://localhost:9001), S3 `127.0.0.1:9000` | `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` |
+| PostgreSQL / MongoDB | `127.0.0.1:5432` / `127.0.0.1:27017` | Root `.env`; applications use restricted accounts |
+| Mailpit | [Mailpit](http://localhost:8025) | Captured local PIM mail; commerce email worker unfinished |
+
+Commerce provisioning creates separate admin/customer/second-customer accounts, retaining existing passwords. Historical disabled seed accounts cannot log in. `UNOPIM_*` credentials belong to product-sync, not a human admin. A fresh clone contains no `.local/LOCAL-ACCESS.md` or another machine's private credential notes.
+
+## Verification
+
+```powershell
+docker compose config --quiet
+docker compose --profile catalog --profile commerce --profile streaming --profile analytics --profile frontend --profile monitoring ps -a
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-market.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify-platform.ps1
+.\.venv\Scripts\python.exe scripts/check-contracts.py
+```
+
+`verify-market` checks store authentication, required infrastructure Docker health and persistent mounts. `verify-platform` checks frontend HTTP, catalogue readiness, monitoring endpoints and nonempty/all-up Prometheus targets. Neither proves a completed checkout, full seed import or initial Spark output. Use the read-only checks in [Cold Start](docs/COLD_START.md#8-verify-initialization).
+
+The `verify-data`, `verify-catalog`, `verify-commerce`, `verify-frontend` and `verify-analytics` scripts run integration/browser tests. They can create retained records, pause workers or exercise recovery. Full test campaigns are separate from basic startup.
+
+## Troubleshooting
+
+| Symptom | Action |
+| --- | --- |
+| Docker stopped / WSL failure | Start Docker Desktop, confirm Linux containers with `docker info`, resolve WSL2/virtualization before continuing. |
+| Port conflict | Inspect `Get-NetTCPConnection -State Listen`; stop the conflicting application. Port changes require auditing scripts, routes and UnoPim's fixed Host header. |
+| Missing environment / blank credentials | New install: prepare before Compose, then provision in order. Existing install: recover original ignored files; do not replace secrets. |
+| Unhealthy container | Inspect `docker compose ps -a` and `docker compose logs --tail 100 <service>`; fix the first failing dependency. Keep credential-bearing logs private. |
+| UnoPim initialization/login fails | Allow migrations/indexing to finish; inspect its PostgreSQL/Elasticsearch dependencies. `/up` does not prove an admin exists. Never run `unopim:install` as repair: it invokes `migrate:fresh`. |
+| Empty catalogue / missing PIM counters | Check Phase 2 import, PIM integration, approvals and `product-sync`. Staff metrics also require Auth. |
+| Spark delayed / empty charts | Check all four topics, `KAFKA_ENABLED=1`, MinIO and worker logs. Initial source refresh precedes streaming. Seed dates may fall outside today's dashboard range. |
+| JVM killed / build fails | Check Docker memory/disk; allow resources for Spark, Elasticsearch and Neo4j. First MinIO compilation/JAR downloads take time. |
+| PowerShell policy blocks scripts | Use the shown per-process `-ExecutionPolicy Bypass`; no permanent machine policy change is required. |
+
+## Safe stop and restart
+
+```powershell
+docker compose --profile catalog --profile commerce --profile streaming --profile analytics --profile frontend --profile monitoring stop -t 60
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\start-platform.ps1
+```
+
+`stop` retains containers and volumes. `down` removes selected containers/networks but retains named volumes by default. Never add `-v`/`--volumes`, prune volumes or reset Docker Desktop to repair startup: those actions can destroy databases, PIM storage, Kafka offsets and lakehouse checkpoints. See [backup/recovery](docs/phase8-backup-recovery.md).
+
+## Repository layout
+
+```text
+data/                 fixtures, contracts, SQL migrations, Mongo/Neo4j schemas, seeds
+market_catalog/       PIM adapter, approved publication, GraphQL, operations status
+market_commerce/      Auth, Orders, Inventory, Payments, Saga, outbox, retention
+market_analytics/     Spark/Delta pipelines, serving API and alerts
+services/             API entry points and container dependencies
+workers/              worker entry points and documentation
+pipelines/            analytics image, pinned Spark JARs and pipeline documentation
+frontend/             React storefront/admin, Nginx, browser tests
+infrastructure/       Compose include, gateway, monitoring, tracing, MinIO build
+scripts/              Windows setup/start/verification and backup tooling
+tests/                automated unit, integration, acceptance and recovery checks
+docs/                 requirements, ADRs, implementation reports and evidence
+```
+
+PostgreSQL schemas are defined in `data/postgres/schema/migrations/`: four business schemas `auth`, `orders`, `inventory`, `payments`, plus technical `monitoring` in `market_db`. Analytics uses separate `market_analytics` and migrations under `data/analytics/`.
+
+## Further documentation
+
+- [Fresh installation](docs/COLD_START.md), [development conventions](AGENTS.md).
+- [Database mappings](docs/phase2-database-setup.md), [PIM/catalogue](docs/phase3-catalogue.md), [commerce/Saga](docs/phase4-commerce.md), [frontend](docs/phase5-frontend.md).
+- [Analytics architecture](docs/phase6-analytics.md), [observability](docs/phase8-observability.md), [backup/recovery](docs/phase8-backup-recovery.md).
+- [EFREI assignment](docs/EFREI-assignment.md), [compliance matrix](docs/phase8-compliance-matrix.md), [recorded Phase 8 results](docs/phase8-final-report.md), [jury demonstrations](docs/phase8-jury-demo.md).
+- [Historical V1 architecture](docs/architecture/MARKET_HARDWARE_ARCHITECTURE.md): V3 and implementation ADRs take precedence.
