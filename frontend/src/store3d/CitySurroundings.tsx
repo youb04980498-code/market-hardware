@@ -1,3 +1,4 @@
+import { Roofline } from "./ArchitectureKit";
 import { createInstances } from "@react-three/drei";
 import { Block, Sign } from "./geometry";
 
@@ -33,26 +34,7 @@ function CityBuilding({ x, z, floors, tint }: (typeof lots)[number]) {
         position={[0, h / 2, 0]}
         color={palette[tint]}
       />
-      <Block
-        size={[11.3, 0.35, 9.9]}
-        position={[0, h + 0.1, 0]}
-        color="#65767a"
-      />
-      <Block
-        size={[10.2, 0.15, 8.8]}
-        position={[0, h + 0.35, 0]}
-        color="#899695"
-      />
-      <Block
-        size={[2.5, 0.85, 2]}
-        position={[-2.4, h + 0.8, -1.7]}
-        color="#bfc7bf"
-      />
-      <Block
-        size={[1.5, 0.65, 1.5]}
-        position={[2.2, h + 0.65, 1]}
-        color="#a1afad"
-      />
+      <Roofline width={10.8} depth={9.4} height={h} />
       <Block size={[11, 0.4, 9.6]} position={[0, 1.2, 0]} color="#eee7d7" />
       {Array.from({ length: floors }, (_, level) => (
         <group key={level}>

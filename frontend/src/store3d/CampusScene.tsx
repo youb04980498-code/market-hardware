@@ -1,5 +1,6 @@
 import type { WarehouseSite } from "./cityLayout";
 import CitySurroundings from "./CitySurroundings";
+import { CampusBuilding } from "./ArchitectureKit";
 import { useEffect, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -11,13 +12,7 @@ import {
 import type { ComponentRef } from "react";
 import { Vector3, PCFShadowMap, MathUtils } from "three";
 import { Block, Sign } from "./geometry";
-import {
-  Interior,
-  DepartmentIsland,
-  Character,
-  Register,
-  Plant,
-} from "./StoreScene";
+import { DepartmentIsland, Character, Register, Plant } from "./StoreScene";
 import { WarehouseRoom, Fulfillment } from "./BusinessScene";
 import { GraphicsLifecycle } from "./GraphicsLifecycle";
 import { departments, shoppers } from "./simulation";
@@ -139,10 +134,12 @@ function Districts() {
 }
 
 function BusinessDistrict({
+  focus,
   snapshot,
   monitoring,
   onSelect,
 }: {
+  focus: CampusFocus;
   snapshot: WorldSnapshot | null;
   monitoring: WorldMonitoring | null;
   onSelect: (s: CampusSelection) => void;
@@ -207,29 +204,18 @@ function BusinessDistrict({
             onSelect({ kind: "facility", id: o.id });
           }}
         >
-          <Block size={[o.w, 0.18, o.d]} position={[0, 0, 0]} color="#f0eadf" />
-          <Block
-            size={[o.w, o.h, 0.18]}
-            position={[0, o.h / 2, -o.d / 2]}
-            color="#e7e7df"
-          />
-          <Block
-            size={[0.15, o.h, o.d]}
-            position={[-o.w / 2, o.h / 2, 0]}
-            color="#e1e5df"
-          />
-          <Block
-            size={[o.w, 0.15, 0.3]}
-            position={[0, o.h, -o.d / 2]}
-            color="#40555e"
-          />
-          <Sign
-            text={o.name}
-            width={o.w - 0.4}
-            height={0.8}
-            position={[0, o.h - 0.4, -o.d / 2 + 0.11]}
-            color="#344e58"
-            ink="#faf0de"
+          <CampusBuilding
+            width={o.w}
+            depth={o.d}
+            height={o.h}
+            title={o.name}
+            subtitle="BUSINESS DISTRICT / VIRTUAL OFFICE"
+            accent={o.accent}
+            kind="office"
+            open={
+              focus.zone === "business" &&
+              (!focus.facility || focus.facility === o.id)
+            }
           />
           <Sign
             text={o.text}
@@ -663,56 +649,9 @@ function CampusGround() {
   );
 }
 
-function FacilitySign({
-  text,
-  sub,
-  width = 12,
-  position = [0, 4, 6.2],
-  onClick,
-}: {
-  text: string;
-  sub: string;
-  width?: number;
-  position?: [number, number, number];
-  onClick: () => void;
-}) {
-  return (
-    <group
-      position={position}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-    >
-      <Block size={[width + 0.3, 1.9, 0.22]} color="#344e58" />
-      <Sign
-        text={text}
-        sub={sub}
-        width={width}
-        height={1.6}
-        position={[0, 0, 0.13]}
-        color="#344e58"
-        ink="#fff7e8"
-      />
-      {[-width / 2, width / 2].map((x) => (
-        <Block
-          key={x}
-          size={[0.12, 3.3, 0.12]}
-          position={[x, -2.5, 0]}
-          color="#47575a"
-        />
-      ))}
-    </group>
-  );
-}
-
 function CheckoutHall() {
   return (
     <>
-      <Block size={[19, 0.18, 13]} position={[0, 0, 0]} color="#e1d5bd" />
-      <Block size={[19, 3.8, 0.2]} position={[0, 1.9, -6.4]} color="#5c686c" />
-      <Block size={[0.2, 3.8, 13]} position={[-9.5, 1.9, 0]} color="#5c686c" />
-      <Block size={[19, 0.2, 0.35]} position={[0, 3.8, -6.4]} color="#3c4c52" />
       {[-5, 0, 5].map((x, i) => (
         <Register key={x} x={x} z={-2} number={`0${i + 1}`} />
       ))}
@@ -1100,6 +1039,7 @@ function Activities({
 }
 
 function Models({
+  focus,
   sites,
   stocks,
   orders,
@@ -1112,6 +1052,7 @@ function Models({
   onSelect,
   onFocus,
 }: {
+  focus: CampusFocus;
   sites: WarehouseSite[];
   stocks: Record<number, WorldStock[]>;
   orders: WorldOrder[];
@@ -1141,6 +1082,7 @@ function Models({
       <Districts />
       <Landscaping />
       <BusinessDistrict
+        focus={focus}
         snapshot={snapshot}
         monitoring={monitoring}
         onSelect={onSelect}
@@ -1152,7 +1094,30 @@ function Models({
           onFocus("storefront");
         }}
       >
-        <Interior withCheckout={false} />
+        <CampusBuilding
+          width={19}
+          depth={14}
+          height={5.2}
+          title="MARKET HARDWARE"
+          subtitle="COMMERCIAL / ELECTRONICS STORE"
+          accent="#c9c5b4"
+          open={focus.zone === "storefront"}
+        />
+        <Plant position={[-8, 0, 5]} scale={0.9} />
+        <Plant position={[8, 0, -5]} scale={0.9} />
+        <Block
+          size={[2.7, 0.9, 1.1]}
+          position={[7.3, 0.5, 4.5]}
+          color="#b9a98c"
+        />
+        <Sign
+          text="PRODUCT ADVICE"
+          width={2.5}
+          height={0.4}
+          position={[7.3, 1.4, 4.5]}
+          color="#354f59"
+          ink="#faf0dc"
+        />
         {departments.map((item) => (
           <DepartmentIsland
             key={item.id}
@@ -1163,11 +1128,6 @@ function Models({
             onSelect={() => onSelect({ kind: "department", id: item.id })}
           />
         ))}
-        <FacilitySign
-          text="STORE"
-          sub="ELECTRONICS / PUBLISHED CATALOGUE"
-          onClick={() => onFocus("storefront")}
-        />
       </group>
       <group
         position={[-22, 0, 15]}
@@ -1176,12 +1136,16 @@ function Models({
           onFocus("checkout");
         }}
       >
-        <CheckoutHall />
-        <FacilitySign
-          text="CHECKOUT"
-          sub="RECORDED ORDER STATES / READ ONLY"
-          onClick={() => onFocus("checkout")}
+        <CampusBuilding
+          width={19}
+          depth={13}
+          height={4.8}
+          title="CHECKOUT"
+          subtitle="COMMERCIAL / RECORDED ORDER STATES"
+          accent="#c7b8ab"
+          open={focus.zone === "checkout"}
         />
+        <CheckoutHall />
       </group>
       {sites.map(({ warehouse: w, position }) => (
         <group
@@ -1193,6 +1157,20 @@ function Models({
             onSelect({ kind: "warehouse", id: w.warehouse_id });
           }}
         >
+          <CampusBuilding
+            width={18.8}
+            depth={13}
+            height={5.5}
+            title={w.name}
+            subtitle={`${w.city} / ${w.classification} / #${w.warehouse_id}`}
+            accent="#b4c4bd"
+            kind="industrial"
+            open={
+              focus.zone === "warehouses" ||
+              (focus.zone === "warehouse" &&
+                focus.warehouseId === w.warehouse_id)
+            }
+          />
           <WarehouseRoom
             stocks={(stocks[w.warehouse_id] ?? []).slice(0, 24)}
             products={products}
@@ -1210,13 +1188,6 @@ function Models({
               )
             }
           />
-          <FacilitySign
-            text={w.name}
-            sub={`${w.city} / ${w.classification} / #${w.warehouse_id}`}
-            width={15}
-            position={[0, 4.2, 6.2]}
-            onClick={() => onFocus("warehouse", w.warehouse_id)}
-          />
         </group>
       ))}
       <group
@@ -1226,16 +1197,21 @@ function Models({
           onFocus("fulfillment");
         }}
       >
+        <CampusBuilding
+          width={19}
+          depth={13}
+          height={5}
+          title="FULFILLMENT"
+          subtitle="LOGISTICS / LOGICAL SHIPPING STATES"
+          accent="#c6c4af"
+          kind="logistics"
+          open={focus.zone === "fulfillment"}
+        />
         <Fulfillment
           orders={orders}
           paused={paused}
           selected={recordSelection}
           onSelect={onSelect}
-        />
-        <FacilitySign
-          text="FULFILLMENT"
-          sub="LOGICAL SHIPPING / NO PHYSICAL TRACKING"
-          onClick={() => onFocus("fulfillment")}
         />
       </group>
       <Board snapshot={snapshot} />
@@ -1332,6 +1308,7 @@ export default function CampusScene({
         <boxGeometry />
         <meshStandardMaterial roughness={0.75} />
         <Models
+          focus={focus}
           sites={sites}
           stocks={stocks}
           orders={orders}

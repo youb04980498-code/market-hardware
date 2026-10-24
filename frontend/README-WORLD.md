@@ -22,3 +22,7 @@ See [architecture, cold-start steps, event flow, configuration, verification and
 The surrounding city quarter adds 21 decorative procedural buildings, window grids, rooftops, connected streets and a small park. It takes general visual inspiration from [Gaurav-Gosain/city](https://github.com/Gaurav-Gosain/city). No upstream code or models were copied: the inspected repository did not provide a reuse license. Surrounding buildings are synthetic scenery, not additional business facilities. Existing clickable operational interiors and API/Kafka behavior remain unchanged. For this visual follow-up, tests were skipped as requested; only the production build was run.
 
 ![Surrounding procedural city quarter](../docs/images/3d-city-quarter.png)
+
+The campus itself now shares `ArchitectureKit.tsx` with the surrounding city: retail façades, office glazing, industrial loading bays, parapets, rooftop equipment and skylights. Overview shows complete buildings; choosing Store, Checkout, a warehouse, Fulfillment or a Business office removes the selected roof/front walls for a cutaway interior. Existing product fixtures, stock racks, order tokens and API interactions are retained. This visual rebuild was production-built and previewed; test suites were skipped as requested.
+
+![Rebuilt campus buildings in the city](../docs/images/3d-campus-rebuilt.png)
